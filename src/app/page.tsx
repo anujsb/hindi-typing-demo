@@ -44,14 +44,23 @@ export default function MangalTypingApp() {
   const shiftMap = layout === "inscript" ? INSCRIPT_SHIFT : REMINGTON_SHIFT;
 
   const fixRemingtonCombinations = (str: string) => {
+    // Strip Zero Width Joiner (ZWJ) to allow proper combinations and ligatures
+    str = str.replace(/\u200D/g, '');
+
     let prevText = "";
     while (prevText !== str) {
       prevText = str;
-      // 1. Fix 'ि' typed before consonant
-      str = str.replace(/ि([क-ह](?:्[क-ह])*)/g, '$1ि');
+      // 1. Swap pending 'ि' (\uE000) with the following consonant and convert to real 'ि'
+      str = str.replace(/\uE000([क-ह](?:्[क-ह])*(?:्)?)/g, '$1\u093F');
     }
 
-    // 2. Vowel formations
+    // 2. Fix half-consonant + vertical bar (ा) -> full consonant
+    // Halant + short i + aa matra (legacy context) -> short i
+    str = str.replace(/्\u093Fा/g, '\u093F');
+    // Halant + aa matra -> full consonant
+    str = str.replace(/्ा/g, '');
+
+    // 3. Vowel formations
     str = str.replace(/अा/g, 'आ');
     str = str.replace(/ाे/g, 'ो');
     str = str.replace(/ाै/g, 'ौ');
@@ -60,7 +69,7 @@ export default function MangalTypingApp() {
     str = str.replace(/आे/g, 'ओ');
     str = str.replace(/आै/g, 'औ');
 
-    // 3. Candra + Anusvara -> Chandrabindu
+    // 4. Candra + Anusvara -> Chandrabindu
     str = str.replace(/ॅं/g, 'ँ');
     // If candra combined with base letter first, fix it when anusvara is added
     str = str.replace(/ऑं/g, 'आँ');
@@ -68,13 +77,13 @@ export default function MangalTypingApp() {
     str = str.replace(/ॲं/g, 'अँ');
     str = str.replace(/ऍं/g, 'एँ');
 
-    // 4. Base letter + candra -> unified character
+    // 5. Base letter + candra -> unified character
     str = str.replace(/आॅ/g, 'ऑ');
     str = str.replace(/अॅ/g, 'ॲ');
     str = str.replace(/एॅ/g, 'ऍ');
     str = str.replace(/ाॅ/g, 'ॉ');
 
-    // 5. Fix Reph (र्) - typed AFTER the consonant in Remington
+    // 6. Fix Reph (र्) - typed AFTER the consonant in Remington
     str = str.replace(/([क-ह](?:्[क-ह])*)([ा-ौंःँ]*)(र्)/g, '$3$1$2');
     
     return str;
@@ -129,7 +138,7 @@ export default function MangalTypingApp() {
   };
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(text);
+    await navigator.clipboard.writeText(text.replace(/\uE000/g, 'ि'));
     setCopied(true);
     setTimeout(() => setCopied(false), 1800);
     textareaRef.current?.focus();
@@ -292,7 +301,7 @@ export default function MangalTypingApp() {
           border-radius: 12px;
           color: #1c1810;
           font-size: 1.5rem;
-          font-family: 'Mangal', 'Noto Sans Devanagari', 'Arial Unicode MS', serif;
+          font-family: 'Kokila', 'Mangal', 'Noto Sans Devanagari', 'Arial Unicode MS', serif;
           line-height: 1.75;
           padding: 18px 20px;
           resize: vertical;
@@ -548,7 +557,7 @@ export default function MangalTypingApp() {
           <textarea
             ref={textareaRef}
             className="textarea"
-            value={text}
+            value={text.replace(/\uE000/g, 'ि')}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={`यहाँ टाइप करें… (${layout === "inscript" ? "Inscript" : "Remington Gail"} layout)`}
