@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { INSCRIPT_NORMAL, INSCRIPT_SHIFT, REMINGTON_NORMAL, REMINGTON_SHIFT, FINGER_COLORS } from "../utils/keyboardMaps";
+import { INSCRIPT_NORMAL, INSCRIPT_SHIFT, REMINGTON_NORMAL, REMINGTON_SHIFT, KRUTIDEV_NORMAL, KRUTIDEV_SHIFT, FINGER_COLORS } from "../utils/keyboardMaps";
 
 interface KeyDef {
   key: string;
@@ -28,20 +28,21 @@ const QUICK_REF = [
 ];
 
 export default function MangalTypingApp() {
-  const [layout, setLayout] = useState<"inscript" | "remington">("inscript");
+  const [layout, setLayout] = useState<"inscript" | "remington" | "krutidev">("inscript");
   const [text, setText] = useState<string>("");
   const [activeKey, setActiveKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const activeKeyTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const altBuffer = useRef<string>("");
 
   // Derived stats
   const charCount = text.length;
   const wordCount = text.trim() ? text.trim().split(/\s+/).filter((w) => w.length > 0).length : 0;
 
   // Derive active mapping
-  const normalMap = layout === "inscript" ? INSCRIPT_NORMAL : REMINGTON_NORMAL;
-  const shiftMap = layout === "inscript" ? INSCRIPT_SHIFT : REMINGTON_SHIFT;
+  const normalMap = layout === "inscript" ? INSCRIPT_NORMAL : layout === "krutidev" ? KRUTIDEV_NORMAL : REMINGTON_NORMAL;
+  const shiftMap = layout === "inscript" ? INSCRIPT_SHIFT : layout === "krutidev" ? KRUTIDEV_SHIFT : REMINGTON_SHIFT;
 
   const fixRemingtonCombinations = (str: string) => {
     // Strip Zero Width Joiner (ZWJ) to allow proper combinations and ligatures
@@ -60,28 +61,32 @@ export default function MangalTypingApp() {
     // Halant + aa matra -> full consonant
     str = str.replace(/्ा/g, '');
 
-    // 3. Vowel formations
-    str = str.replace(/अा/g, 'आ');
-    str = str.replace(/ाे/g, 'ो');
-    str = str.replace(/ाै/g, 'ौ');
-    str = str.replace(/अो/g, 'ओ');
-    str = str.replace(/अौ/g, 'औ');
-    str = str.replace(/आे/g, 'ओ');
-    str = str.replace(/आै/g, 'औ');
+    if (layout === "remington") {
+      // 3. Vowel formations
+      str = str.replace(/अा/g, 'आ');
+      str = str.replace(/ाे/g, 'ो');
+      str = str.replace(/ाै/g, 'ौ');
+      str = str.replace(/अो/g, 'ओ');
+      str = str.replace(/अौ/g, 'औ');
+      str = str.replace(/आे/g, 'ओ');
+      str = str.replace(/आै/g, 'औ');
 
-    // 4. Candra + Anusvara -> Chandrabindu
-    str = str.replace(/ॅं/g, 'ँ');
-    // If candra combined with base letter first, fix it when anusvara is added
-    str = str.replace(/ऑं/g, 'आँ');
-    str = str.replace(/ॉं/g, 'ाँ');
-    str = str.replace(/ॲं/g, 'अँ');
-    str = str.replace(/ऍं/g, 'एँ');
+      // 4. Candra + Anusvara -> Chandrabindu
+      str = str.replace(/ॅं/g, 'ँ');
+      // If candra combined with base letter first, fix it when anusvara is added
+      str = str.replace(/ऑं/g, 'आँ');
+      str = str.replace(/ॉं/g, 'ाँ');
+      str = str.replace(/ॲं/g, 'अँ');
+      str = str.replace(/ऍं/g, 'एँ');
+    }
 
-    // 5. Base letter + candra -> unified character
-    str = str.replace(/आॅ/g, 'ऑ');
-    str = str.replace(/अॅ/g, 'ॲ');
-    str = str.replace(/एॅ/g, 'ऍ');
-    str = str.replace(/ाॅ/g, 'ॉ');
+    if (layout === "remington") {
+      // 5. Base letter + candra -> unified character
+      str = str.replace(/आॅ/g, 'ऑ');
+      str = str.replace(/अॅ/g, 'ॲ');
+      str = str.replace(/एॅ/g, 'ऍ');
+      str = str.replace(/ाॅ/g, 'ॉ');
+    }
 
     // 6. Fix Reph (र्) - typed AFTER the consonant in Remington
     str = str.replace(/([क-ह](?:्[क-ह])*)([ा-ौंःँ]*)(र्)/g, '$3$1$2');
@@ -93,7 +98,22 @@ export default function MangalTypingApp() {
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === "Shift") return;
       if (e.key === "Backspace" || e.key === "Enter" || e.key === "Tab") return;
-      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      
+      if (e.key === "Alt") {
+        altBuffer.current = "";
+        return;
+      }
+      
+      if (e.altKey) {
+        const digitMatch = e.code.match(/Numpad(\d)/) || e.key.match(/^(\d)$/);
+        if (digitMatch) {
+          altBuffer.current += digitMatch[1];
+          e.preventDefault();
+        }
+        return;
+      }
+      
+      if (e.ctrlKey || e.metaKey) return;
 
       const key = e.key;
       const lowerKey = key.toLowerCase();
@@ -109,8 +129,8 @@ export default function MangalTypingApp() {
         const end = ta.selectionEnd ?? 0;
         const newTextUnfixed = text.slice(0, start) + mapped + text.slice(end);
         
-        // Apply combination fixes only for Remington layout
-        const newTextFixed = layout === "remington" ? fixRemingtonCombinations(newTextUnfixed) : newTextUnfixed;
+        // Apply combination fixes only for Remington and Kruti Dev layout
+        const newTextFixed = (layout === "remington" || layout === "krutidev") ? fixRemingtonCombinations(newTextUnfixed) : newTextUnfixed;
         
         setText(newTextFixed);
 
@@ -131,6 +151,39 @@ export default function MangalTypingApp() {
     },
     [text, normalMap, shiftMap]
   );
+
+  const handleKeyUp = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Alt" && altBuffer.current.length > 0) {
+      if (layout === "krutidev") {
+        const altMap: Record<string, string> = {
+          "0161": "ँ", "0152": "द्व", "0153": "ट्ट", "0155": "ट्ठ",
+          "0159": "ट्", "0163": "ख्", "0165": "ज", "0180": "ज",
+          "0182": "फ", "0197": "ऊ", "0216": "क्र", "0217": "र",
+          "0221": "फ्र", "0225": "ह्य", "0227": "ह्म", "0240": "दृ"
+        };
+        const mapped = altMap[altBuffer.current];
+        if (mapped) {
+          const ta = textareaRef.current;
+          if (ta) {
+            const start = ta.selectionStart ?? 0;
+            const end = ta.selectionEnd ?? 0;
+            const newTextUnfixed = text.slice(0, start) + mapped + text.slice(end);
+            const newTextFixed = fixRemingtonCombinations(newTextUnfixed);
+            setText(newTextFixed);
+
+            requestAnimationFrame(() => {
+              if (ta) {
+                const newCursor = start + mapped.length + (newTextFixed.length - newTextUnfixed.length);
+                ta.selectionStart = newCursor;
+                ta.selectionEnd = newCursor;
+              }
+            });
+          }
+        }
+      }
+      altBuffer.current = "";
+    }
+  }, [layout, text, fixRemingtonCombinations]);
 
   const handleClear = () => {
     setText("");
@@ -528,12 +581,13 @@ export default function MangalTypingApp() {
             className="layout-select" 
             value={layout} 
             onChange={(e) => {
-              setLayout(e.target.value as "inscript" | "remington");
+              setLayout(e.target.value as "inscript" | "remington" | "krutidev");
               textareaRef.current?.focus();
             }}
           >
             <option value="inscript">Inscript Layout (Standard)</option>
             <option value="remington">Remington Gail Layout</option>
+            <option value="krutidev">Kruti Dev 010 Layout</option>
           </select>
         </div>
 
@@ -560,7 +614,8 @@ export default function MangalTypingApp() {
             value={text.replace(/\uE000/g, 'ि')}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={`यहाँ टाइप करें… (${layout === "inscript" ? "Inscript" : "Remington Gail"} layout)`}
+            onKeyUp={handleKeyUp}
+            placeholder={`यहाँ टाइप करें… (${layout === "inscript" ? "Inscript" : layout === "krutidev" ? "Kruti Dev 010" : "Remington Gail"} layout)`}
             autoFocus
             spellCheck={false}
           />
