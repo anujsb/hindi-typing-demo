@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { INSCRIPT_NORMAL, INSCRIPT_SHIFT, REMINGTON_NORMAL, REMINGTON_SHIFT, KRUTIDEV_NORMAL, KRUTIDEV_SHIFT, FINGER_COLORS } from "../utils/keyboardMaps";
+import { getLayout } from "../layouts";
+import { FINGER_COLORS } from "../layouts/types";
 
 interface KeyDef {
   key: string;
@@ -28,7 +29,7 @@ const QUICK_REF = [
 ];
 
 export default function MangalTypingApp() {
-  const [layout, setLayout] = useState<"inscript" | "remington" | "krutidev">("inscript");
+  const [layoutId, setLayoutId] = useState<string>("inscript");
   const [text, setText] = useState<string>("");
   const [activeKey, setActiveKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -36,63 +37,15 @@ export default function MangalTypingApp() {
   const activeKeyTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const altBuffer = useRef<string>("");
 
+  const currentLayout = getLayout(layoutId);
+  const normalMap = currentLayout.normalMap;
+  const shiftMap = currentLayout.shiftMap;
+  const processor = currentLayout.processor;
+  const altCodeMap = currentLayout.altCodeMap;
+
   // Derived stats
   const charCount = text.length;
   const wordCount = text.trim() ? text.trim().split(/\s+/).filter((w) => w.length > 0).length : 0;
-
-  // Derive active mapping
-  const normalMap = layout === "inscript" ? INSCRIPT_NORMAL : layout === "krutidev" ? KRUTIDEV_NORMAL : REMINGTON_NORMAL;
-  const shiftMap = layout === "inscript" ? INSCRIPT_SHIFT : layout === "krutidev" ? KRUTIDEV_SHIFT : REMINGTON_SHIFT;
-
-  const fixRemingtonCombinations = (str: string) => {
-    // Strip Zero Width Joiner (ZWJ) to allow proper combinations and ligatures
-    str = str.replace(/\u200D/g, '');
-
-    let prevText = "";
-    while (prevText !== str) {
-      prevText = str;
-      // 1. Swap pending 'ि' (\uE000) with the following consonant and convert to real 'ि'
-      str = str.replace(/\uE000([क-ह](?:्[क-ह])*(?:्)?)/g, '$1\u093F');
-    }
-
-    // 2. Fix half-consonant + vertical bar (ा) -> full consonant
-    // Halant + short i + aa matra (legacy context) -> short i
-    str = str.replace(/्\u093Fा/g, '\u093F');
-    // Halant + aa matra -> full consonant
-    str = str.replace(/्ा/g, '');
-
-    if (layout === "remington") {
-      // 3. Vowel formations
-      str = str.replace(/अा/g, 'आ');
-      str = str.replace(/ाे/g, 'ो');
-      str = str.replace(/ाै/g, 'ौ');
-      str = str.replace(/अो/g, 'ओ');
-      str = str.replace(/अौ/g, 'औ');
-      str = str.replace(/आे/g, 'ओ');
-      str = str.replace(/आै/g, 'औ');
-
-      // 4. Candra + Anusvara -> Chandrabindu
-      str = str.replace(/ॅं/g, 'ँ');
-      // If candra combined with base letter first, fix it when anusvara is added
-      str = str.replace(/ऑं/g, 'आँ');
-      str = str.replace(/ॉं/g, 'ाँ');
-      str = str.replace(/ॲं/g, 'अँ');
-      str = str.replace(/ऍं/g, 'एँ');
-    }
-
-    if (layout === "remington") {
-      // 5. Base letter + candra -> unified character
-      str = str.replace(/आॅ/g, 'ऑ');
-      str = str.replace(/अॅ/g, 'ॲ');
-      str = str.replace(/एॅ/g, 'ऍ');
-      str = str.replace(/ाॅ/g, 'ॉ');
-    }
-
-    // 6. Fix Reph (र्) - typed AFTER the consonant in Remington
-    str = str.replace(/([क-ह](?:्[क-ह])*)([ा-ौंःँ]*)(र्)/g, '$3$1$2');
-    
-    return str;
-  };
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -129,8 +82,8 @@ export default function MangalTypingApp() {
         const end = ta.selectionEnd ?? 0;
         const newTextUnfixed = text.slice(0, start) + mapped + text.slice(end);
         
-        // Apply combination fixes only for Remington and Kruti Dev layout
-        const newTextFixed = (layout === "remington" || layout === "krutidev") ? fixRemingtonCombinations(newTextUnfixed) : newTextUnfixed;
+        // Apply combination fixes if layout has a processor
+        const newTextFixed = processor ? processor(newTextUnfixed) : newTextUnfixed;
         
         setText(newTextFixed);
 
@@ -149,26 +102,20 @@ export default function MangalTypingApp() {
         activeKeyTimeout.current = setTimeout(() => setActiveKey(null), 150);
       }
     },
-    [text, normalMap, shiftMap]
+    [text, normalMap, shiftMap, processor]
   );
 
   const handleKeyUp = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Alt" && altBuffer.current.length > 0) {
-      if (layout === "krutidev") {
-        const altMap: Record<string, string> = {
-          "0161": "ँ", "0152": "द्व", "0153": "ट्ट", "0155": "ट्ठ",
-          "0159": "ट्", "0163": "ख्", "0165": "ज", "0180": "ज",
-          "0182": "फ", "0197": "ऊ", "0216": "क्र", "0217": "र",
-          "0221": "फ्र", "0225": "ह्य", "0227": "ह्म", "0240": "दृ"
-        };
-        const mapped = altMap[altBuffer.current];
+      if (altCodeMap) {
+        const mapped = altCodeMap[altBuffer.current];
         if (mapped) {
           const ta = textareaRef.current;
           if (ta) {
             const start = ta.selectionStart ?? 0;
             const end = ta.selectionEnd ?? 0;
             const newTextUnfixed = text.slice(0, start) + mapped + text.slice(end);
-            const newTextFixed = fixRemingtonCombinations(newTextUnfixed);
+            const newTextFixed = processor ? processor(newTextUnfixed) : newTextUnfixed;
             setText(newTextFixed);
 
             requestAnimationFrame(() => {
@@ -183,7 +130,7 @@ export default function MangalTypingApp() {
       }
       altBuffer.current = "";
     }
-  }, [layout, text, fixRemingtonCombinations]);
+  }, [altCodeMap, processor, text]);
 
   const handleClear = () => {
     setText("");
@@ -216,491 +163,156 @@ export default function MangalTypingApp() {
     keys: r.keys.map(k => ({
       key: k,
       normal: normalMap[k] || k,
-      // Shift keys are generally uppercase variants of letters, but symbols stay the same key representation
       shift: shiftMap[k.toUpperCase()] || shiftMap[k] || k
     }))
   }));
 
   return (
-    <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@400;500&display=swap');
+    <div className="min-h-screen bg-[#faf7f2] font-[Georgia,serif] text-[#1c1810] py-10 px-5 sm:px-8">
+      {/* Header */}
+      <header className="text-center mb-6">
+        <p className="font-mono text-xs tracking-[0.18em] uppercase text-[#a0896a] mb-2.5">Unicode · Keyboard Settings</p>
+        <h1 className="text-3xl sm:text-4xl md:text-[3.2rem] font-bold text-[#1c1810] leading-tight font-serif tracking-tight">मंगल हिंदी टाइपिंग</h1>
+        <p className="mt-2 font-mono text-[0.75rem] text-[#a0896a] tracking-wider">Select Layout & Start Typing</p>
+        <div className="w-12 h-0.5 bg-[#c9a96e] mx-auto mt-4 rounded-sm" />
+      </header>
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-          background: #faf7f2;
-          min-height: 100vh;
-        }
-
-        .root {
-          min-height: 100vh;
-          background: #faf7f2;
-          font-family: 'Libre Baskerville', Georgia, serif;
-          color: #1c1810;
-          padding: 40px 20px 60px;
-        }
-
-        /* — Header — */
-        .header { text-align: center; margin-bottom: 24px; }
-        .header-eyebrow {
-          font-family: 'DM Mono', monospace;
-          font-size: 0.7rem;
-          letter-spacing: 0.18em;
-          text-transform: uppercase;
-          color: #a0896a;
-          margin-bottom: 10px;
-        }
-        .header-title {
-          font-size: clamp(2rem, 5vw, 3.2rem);
-          font-weight: 700;
-          color: #1c1810;
-          line-height: 1.1;
-          font-family: 'Libre Baskerville', serif;
-        }
-        .header-subtitle {
-          margin-top: 8px;
-          font-family: 'DM Mono', monospace;
-          font-size: 0.75rem;
-          color: #a0896a;
-          letter-spacing: 0.08em;
-        }
-        .header-rule {
-          width: 48px;
-          height: 2px;
-          background: #c9a96e;
-          margin: 16px auto 0;
-          border-radius: 2px;
-        }
-
-        /* — Layout Selector — */
-        .layout-selector {
-          display: flex;
-          justify-content: center;
-          margin-bottom: 32px;
-        }
-        .layout-select {
-          font-family: 'DM Mono', monospace;
-          font-size: 0.85rem;
-          color: #1c1810;
-          background: #fff;
-          border: 1px solid #e8dcc8;
-          padding: 8px 32px 8px 16px;
-          border-radius: 8px;
-          outline: none;
-          cursor: pointer;
-          appearance: none;
-          background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23a0896a%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-          background-repeat: no-repeat;
-          background-position: right 12px top 50%;
-          background-size: 10px auto;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-          transition: border-color 0.2s;
-        }
-        .layout-select:focus, .layout-select:hover {
-          border-color: #c9a96e;
-        }
-
-        /* — Stats — */
-        .stats {
-          display: flex;
-          gap: 12px;
-          justify-content: center;
-          margin-bottom: 28px;
-        }
-        .stat-pill {
-          background: #fff;
-          border: 1px solid #e8dcc8;
-          border-radius: 40px;
-          padding: 8px 22px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-        }
-        .stat-value {
-          font-family: 'DM Mono', monospace;
-          font-size: 1.2rem;
-          font-weight: 500;
-          color: #1c1810;
-        }
-        .stat-label {
-          font-family: 'DM Mono', monospace;
-          font-size: 0.65rem;
-          text-transform: uppercase;
-          letter-spacing: 0.14em;
-          color: #a0896a;
-        }
-        .stat-sep { width: 1px; height: 18px; background: #e8dcc8; }
-
-        /* — Editor — */
-        .editor-wrap {
-          max-width: 680px;
-          margin: 0 auto 32px;
-        }
-        .editor-label {
-          font-family: 'DM Mono', monospace;
-          font-size: 0.65rem;
-          text-transform: uppercase;
-          letter-spacing: 0.16em;
-          color: #a0896a;
-          margin-bottom: 8px;
-        }
-        .textarea {
-          width: 100%;
-          min-height: 148px;
-          background: #fff;
-          border: 1.5px solid #e0d3bc;
-          border-radius: 12px;
-          color: #1c1810;
-          font-size: 1.5rem;
-          font-family: 'Kokila', 'Mangal', 'Noto Sans Devanagari', 'Arial Unicode MS', serif;
-          line-height: 1.75;
-          padding: 18px 20px;
-          resize: vertical;
-          outline: none;
-          transition: border-color 0.2s, box-shadow 0.2s;
-          caret-color: #c9a96e;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        }
-        .textarea::placeholder { color: #cbbfa8; }
-        .textarea:focus {
-          border-color: #c9a96e;
-          box-shadow: 0 0 0 3px rgba(201,169,110,0.15), 0 2px 8px rgba(0,0,0,0.04);
-        }
-
-        .actions {
-          display: flex;
-          gap: 10px;
-          margin-top: 12px;
-        }
-        .btn {
-          font-family: 'DM Mono', monospace;
-          font-size: 0.75rem;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          padding: 9px 20px;
-          border-radius: 8px;
-          border: 1.5px solid transparent;
-          cursor: pointer;
-          font-weight: 500;
-          transition: all 0.18s;
-        }
-        .btn-primary {
-          background: #1c1810;
-          color: #faf7f2;
-          border-color: #1c1810;
-        }
-        .btn-primary:hover { background: #332b1e; }
-        .btn-ghost {
-          background: transparent;
-          color: #a0896a;
-          border-color: #e0d3bc;
-        }
-        .btn-ghost:hover { background: #f5ede0; border-color: #c9a96e; color: #7a6344; }
-        .btn-success {
-          background: #d4edda;
-          color: #1a5c2d;
-          border-color: #a8d5b5;
-        }
-
-        /* — Keyboard — */
-        .keyboard-wrap {
-          max-width: 800px;
-          margin: 0 auto;
-        }
-        .keyboard-section-label {
-          font-family: 'DM Mono', monospace;
-          font-size: 0.65rem;
-          text-transform: uppercase;
-          letter-spacing: 0.16em;
-          color: #a0896a;
-          text-align: center;
-          margin-bottom: 14px;
-        }
-        .keyboard-surface {
-          background: #fff;
-          border: 1px solid #e8dcc8;
-          border-radius: 16px;
-          padding: 18px 16px 16px;
-          box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
-        }
-        .key-row {
-          display: flex;
-          gap: 4px;
-          justify-content: center;
-          margin-bottom: 4px;
-        }
-        .key {
-          width: 52px;
-          height: 50px;
-          background: #faf7f2;
-          border: 1px solid #e0d3bc;
-          border-bottom: 3px solid #d4c4a8;
-          border-radius: 6px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          cursor: default;
-          transition: all 0.1s;
-          position: relative;
-          flex-shrink: 0;
-          user-select: none;
-        }
-        .key.active {
-          transform: translateY(2px);
-          border-bottom-width: 1px;
-        }
-        .key-shift-char {
-          position: absolute;
-          top: 3px;
-          right: 5px;
-          font-size: 0.55rem;
-          color: #b0a08a;
-          font-family: 'Noto Sans Devanagari', serif;
-          line-height: 1;
-        }
-        .key-main-char {
-          font-size: 1rem;
-          font-family: 'Mangal', 'Noto Sans Devanagari', serif;
-          line-height: 1;
-          color: #2d2418;
-        }
-        .key-eng {
-          font-family: 'DM Mono', monospace;
-          font-size: 0.5rem;
-          color: #b0a08a;
-          text-transform: uppercase;
-          margin-top: 2px;
-          letter-spacing: 0.04em;
-        }
-
-        /* Space row */
-        .space-row {
-          display: flex;
-          gap: 4px;
-          justify-content: center;
-          margin-top: 4px;
-        }
-        .key-special {
-          height: 38px;
-          background: #f0e9dc;
-          border: 1px solid #e0d3bc;
-          border-bottom: 3px solid #d4c4a8;
-          border-radius: 6px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-family: 'DM Mono', monospace;
-          font-size: 0.6rem;
-          color: #a0896a;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
-          flex-shrink: 0;
-          user-select: none;
-        }
-
-        /* — Quick Ref — */
-        .quickref-wrap {
-          max-width: 680px;
-          margin: 24px auto 0;
-          background: #fff;
-          border: 1px solid #e8dcc8;
-          border-radius: 12px;
-          padding: 16px 20px;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-        }
-        .quickref-label {
-          font-family: 'DM Mono', monospace;
-          font-size: 0.65rem;
-          text-transform: uppercase;
-          letter-spacing: 0.16em;
-          color: #a0896a;
-          margin-bottom: 12px;
-        }
-        .quickref-items {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 6px;
-        }
-        .quickref-item {
-          background: #faf7f2;
-          border: 1px solid #e8dcc8;
-          border-radius: 6px;
-          padding: 5px 12px;
-          display: flex;
-          align-items: center;
-          gap: 7px;
-          font-size: 0.8rem;
-        }
-        .quickref-key {
-          font-family: 'DM Mono', monospace;
-          font-size: 0.75rem;
-          color: #7a6344;
-          background: #f0e9dc;
-          padding: 1px 6px;
-          border-radius: 3px;
-          border: 1px solid #e0d3bc;
-        }
-        .quickref-arrow { color: #c9b99a; font-size: 0.7rem; }
-        .quickref-hindi {
-          font-family: 'Noto Sans Devanagari', serif;
-          color: #1c1810;
-        }
-
-        .footer-note {
-          text-align: center;
-          font-family: 'DM Mono', monospace;
-          font-size: 0.65rem;
-          color: #c9b99a;
-          margin-top: 28px;
-          letter-spacing: 0.1em;
-        }
-
-        @media (max-width: 600px) {
-          .key { width: 30px; height: 42px; }
-          .key-main-char { font-size: 0.8rem; }
-          .key-shift-char { font-size: 0.45rem; }
-          .key-eng { font-size: 0.42rem; }
-        }
-      `}</style>
-
-      <div className="root">
-        {/* Header */}
-        <header className="header">
-          <p className="header-eyebrow">Unicode · Keyboard Settings</p>
-          <h1 className="header-title">मंगल हिंदी टाइपिंग</h1>
-          <p className="header-subtitle">Select Layout & Start Typing</p>
-          <div className="header-rule" />
-        </header>
-
-        {/* Layout Selector */}
-        <div className="layout-selector">
-          <select 
-            className="layout-select" 
-            value={layout} 
-            onChange={(e) => {
-              setLayout(e.target.value as "inscript" | "remington" | "krutidev");
-              textareaRef.current?.focus();
-            }}
-          >
-            <option value="inscript">Inscript Layout (Standard)</option>
-            <option value="remington">Remington Gail Layout</option>
-            <option value="krutidev">Kruti Dev 010 Layout</option>
-          </select>
-        </div>
-
-        {/* Stats */}
-        <div className="stats">
-          <div className="stat-pill">
-            <span className="stat-value">{charCount}</span>
-            <div className="stat-sep" />
-            <span className="stat-label">Characters</span>
-          </div>
-          <div className="stat-pill">
-            <span className="stat-value">{wordCount}</span>
-            <div className="stat-sep" />
-            <span className="stat-label">Words</span>
-          </div>
-        </div>
-
-        {/* Editor */}
-        <div className="editor-wrap">
-          <p className="editor-label">Type below · यहाँ टाइप करें</p>
-          <textarea
-            ref={textareaRef}
-            className="textarea"
-            value={text.replace(/\uE000/g, 'ि')}
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onKeyUp={handleKeyUp}
-            placeholder={`यहाँ टाइप करें… (${layout === "inscript" ? "Inscript" : layout === "krutidev" ? "Kruti Dev 010" : "Remington Gail"} layout)`}
-            autoFocus
-            spellCheck={false}
-          />
-          <div className="actions">
-            <button
-              className={`btn ${copied ? "btn-success" : "btn-primary"}`}
-              onClick={handleCopy}
-            >
-              {copied ? "✓ Copied!" : "Copy Text"}
-            </button>
-            <button className="btn btn-ghost" onClick={handleClear}>
-              Clear
-            </button>
-          </div>
-        </div>
-
-        {/* Keyboard */}
-        <div className="keyboard-wrap">
-          <p className="keyboard-section-label">Virtual Keyboard Reference</p>
-          <div className="keyboard-surface">
-            {KEY_ROWS.map(({ row, keys }) => (
-              <div
-                key={row}
-                className="key-row"
-                style={{ paddingLeft: rowPadding[row] ?? "0px" }}
-              >
-                {keys.map(({ key, normal, shift }) => {
-                  const isActive = activeKey === key.toLowerCase();
-                  const fingerColor = FINGER_COLORS[key.toLowerCase()] ?? "#888";
-                  return (
-                    <div
-                      key={key}
-                      className={`key${isActive ? " active" : ""}`}
-                      style={{
-                        background: isActive ? `${fingerColor}18` : undefined,
-                        borderColor: isActive ? fingerColor : undefined,
-                        borderBottomColor: isActive ? fingerColor : undefined,
-                        boxShadow: isActive ? `0 0 0 2px ${fingerColor}30` : undefined,
-                      }}
-                    >
-                      {shift !== normal && (
-                        <span className="key-shift-char">{shift}</span>
-                      )}
-                      <span
-                        className="key-main-char"
-                        style={{ color: isActive ? fingerColor : undefined }}
-                      >
-                        {normal}
-                      </span>
-                      <span className="key-eng">{key}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-
-            {/* Space row */}
-            <div className="space-row">
-              <div className="key-special" style={{ width: 64 }}>Shift</div>
-              <div className="key-special" style={{ width: 280, background: "#f5f0e8", color: "#7a6344" }}>
-                Space — स्पेस
-              </div>
-              <div className="key-special" style={{ width: 64 }}>Shift</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Ref */}
-        <div className="quickref-wrap">
-          <p className="quickref-label">Quick Reference (Inscript)</p>
-          <div className="quickref-items">
-            {QUICK_REF.map(({ key, hindi }) => (
-              <div key={key} className="quickref-item">
-                <span className="quickref-key">{key}</span>
-                <span className="quickref-arrow">→</span>
-                <span className="quickref-hindi">{hindi}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <p className="footer-note">
-          Click the text area · Start typing · Mangal Unicode
-        </p>
+      {/* Layout Selector */}
+      <div className="flex justify-center mb-8">
+        <select 
+          className="font-mono text-sm text-[#1c1810] bg-white border border-[#e8dcc8] py-2 pl-4 pr-8 rounded-lg outline-none cursor-pointer appearance-none shadow-sm transition-colors hover:border-[#c9a96e] focus:border-[#c9a96e] bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23a0896a%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[position:right_12px_top_50%] bg-[size:10px_auto]"
+          value={layoutId} 
+          onChange={(e) => {
+            setLayoutId(e.target.value);
+            textareaRef.current?.focus();
+          }}
+        >
+          <option value="inscript">Inscript Layout (Standard)</option>
+          <option value="remington">Remington Gail Layout</option>
+          <option value="krutidev">Kruti Dev 010 Layout</option>
+          <option value="english">English (Standard)</option>
+        </select>
       </div>
-    </>
+
+      {/* Stats */}
+      <div className="flex gap-3 justify-center mb-7">
+        <div className="bg-white border border-[#e8dcc8] rounded-full py-2 px-5 flex items-center gap-2.5 shadow-sm">
+          <span className="font-mono text-lg font-medium text-[#1c1810]">{charCount}</span>
+          <div className="w-[1px] h-[18px] bg-[#e8dcc8]" />
+          <span className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-[#a0896a]">Characters</span>
+        </div>
+        <div className="bg-white border border-[#e8dcc8] rounded-full py-2 px-5 flex items-center gap-2.5 shadow-sm">
+          <span className="font-mono text-lg font-medium text-[#1c1810]">{wordCount}</span>
+          <div className="w-[1px] h-[18px] bg-[#e8dcc8]" />
+          <span className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-[#a0896a]">Words</span>
+        </div>
+      </div>
+
+      {/* Editor */}
+      <div className="max-w-[680px] mx-auto mb-8">
+        <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-[#a0896a] mb-2">Type below · यहाँ टाइप करें</p>
+        <textarea
+          ref={textareaRef}
+          className="w-full min-h-[148px] bg-white border-[1.5px] border-[#e0d3bc] rounded-xl text-[#1c1810] text-2xl sm:text-3xl font-[Arial_Unicode_MS,sans-serif] leading-relaxed p-4 sm:p-5 resize-y outline-none transition-all shadow-sm focus:border-[#c9a96e] focus:ring-[3px] focus:ring-[#c9a96e26]"
+          value={text.replace(/\uE000/g, 'ि')}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onKeyUp={handleKeyUp}
+          placeholder={`यहाँ टाइप करें… (${currentLayout.name})`}
+          autoFocus
+          spellCheck={false}
+          style={{ caretColor: '#c9a96e' }}
+        />
+        <div className="flex gap-2.5 mt-3">
+          <button
+            className={`font-mono text-xs tracking-wider uppercase py-2 px-5 rounded-lg border-[1.5px] font-medium transition-all ${
+              copied 
+                ? "bg-[#d4edda] text-[#1a5c2d] border-[#a8d5b5]" 
+                : "bg-[#1c1810] text-[#faf7f2] border-[#1c1810] hover:bg-[#332b1e]"
+            }`}
+            onClick={handleCopy}
+          >
+            {copied ? "✓ Copied!" : "Copy Text"}
+          </button>
+          <button 
+            className="font-mono text-xs tracking-wider uppercase py-2 px-5 rounded-lg border-[1.5px] border-[#e0d3bc] bg-transparent text-[#a0896a] font-medium transition-all hover:bg-[#f5ede0] hover:border-[#c9a96e] hover:text-[#7a6344]" 
+            onClick={handleClear}
+          >
+            Clear
+          </button>
+        </div>
+      </div>
+
+      {/* Keyboard */}
+      <div className="max-w-[800px] mx-auto">
+        <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-[#a0896a] text-center mb-3.5">Virtual Keyboard Reference</p>
+        <div className="bg-white border border-[#e8dcc8] rounded-2xl p-4 sm:p-5 pb-4 shadow-md">
+          {KEY_ROWS.map(({ row, keys }) => (
+            <div
+              key={row}
+              className="flex gap-1 justify-center mb-1"
+              style={{ paddingLeft: rowPadding[row] ?? "0px" }}
+            >
+              {keys.map(({ key, normal, shift }) => {
+                const isActive = activeKey === key.toLowerCase();
+                const fingerColor = FINGER_COLORS[key.toLowerCase()] ?? "#888";
+                return (
+                  <div
+                    key={key}
+                    className={`w-[30px] h-[42px] sm:w-[52px] sm:h-[50px] bg-[#faf7f2] border border-[#e0d3bc] border-b-[3px] border-b-[#d4c4a8] rounded-md flex flex-col items-center justify-center cursor-default transition-all relative shrink-0 select-none ${isActive ? 'translate-y-[2px] !border-b-[1px]' : ''}`}
+                    style={{
+                      background: isActive ? `${fingerColor}18` : undefined,
+                      borderColor: isActive ? fingerColor : undefined,
+                      borderBottomColor: isActive ? fingerColor : undefined,
+                      boxShadow: isActive ? `0 0 0 2px ${fingerColor}30` : undefined,
+                    }}
+                  >
+                    {shift !== normal && (
+                      <span className="absolute top-[3px] right-[5px] text-[0.45rem] sm:text-[0.55rem] text-[#b0a08a] font-sans leading-none">{shift}</span>
+                    )}
+                    <span
+                      className="text-[0.8rem] sm:text-base font-sans leading-none text-[#2d2418]"
+                      style={{ color: isActive ? fingerColor : undefined }}
+                    >
+                      {normal}
+                    </span>
+                    <span className="font-mono text-[0.42rem] sm:text-[0.5rem] text-[#b0a08a] uppercase mt-0.5 tracking-wider">{key}</span>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+
+          {/* Space row */}
+          <div className="flex gap-1 justify-center mt-1">
+            <div className="h-[38px] w-16 bg-[#f0e9dc] border border-[#e0d3bc] border-b-[3px] border-b-[#d4c4a8] rounded-md flex items-center justify-center font-mono text-[0.6rem] text-[#a0896a] tracking-wider uppercase shrink-0 select-none">Shift</div>
+            <div className="h-[38px] w-[200px] sm:w-[280px] bg-[#f5f0e8] border border-[#e0d3bc] border-b-[3px] border-b-[#d4c4a8] rounded-md flex items-center justify-center font-mono text-[0.6rem] text-[#7a6344] tracking-wider uppercase shrink-0 select-none">
+              Space — स्पेस
+            </div>
+            <div className="h-[38px] w-16 bg-[#f0e9dc] border border-[#e0d3bc] border-b-[3px] border-b-[#d4c4a8] rounded-md flex items-center justify-center font-mono text-[0.6rem] text-[#a0896a] tracking-wider uppercase shrink-0 select-none">Shift</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Ref */}
+      {layoutId === "inscript" && (
+        <div className="max-w-[680px] mx-auto mt-6 bg-white border border-[#e8dcc8] rounded-xl p-4 sm:px-5 shadow-sm">
+          <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-[#a0896a] mb-3">Quick Reference (Inscript)</p>
+          <div className="flex flex-wrap gap-1.5">
+            {QUICK_REF.map(({ key, hindi }) => (
+              <div key={key} className="bg-[#faf7f2] border border-[#e8dcc8] rounded-md py-1 px-3 flex items-center gap-1.5 text-sm">
+                <span className="font-mono text-xs text-[#7a6344] bg-[#f0e9dc] py-[1px] px-1.5 rounded-[3px] border border-[#e0d3bc]">{key}</span>
+                <span className="text-[#c9b99a] text-[0.7rem]">→</span>
+                <span className="font-sans text-[#1c1810]">{hindi}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <p className="text-center font-mono text-[0.65rem] text-[#c9b99a] mt-7 tracking-[0.1em]">
+        Click the text area · Start typing · Mangal Unicode
+      </p>
+    </div>
   );
 }
