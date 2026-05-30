@@ -45,7 +45,9 @@ export const processMangalCombinations = (str: string): string => {
   str = str.replace(/ाॅ/g, 'ॉ');
 
   // 6. Fix Reph (र्) - typed AFTER the consonant in Remington
-  str = str.replace(/([क-ह](?:्[क-ह])*)([ा-ौंःँ]*)(र्)/g, '$3$1$2');
+  // A negative lookahead (?![क-ह]) ensures we don't match a Reph that has ALREADY been shifted
+  // (which would cause it to continuously travel backwards to the beginning of the word on subsequent keystrokes).
+  str = str.replace(/([क-ह](?:्[क-ह])*)([ा-ौंःँ]*)(र्)(?![क-ह])/g, '$3$1$2');
   
   return str;
 };
