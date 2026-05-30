@@ -213,7 +213,7 @@ export default function MangalTypingApp() {
         <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-[#a0896a] mb-2">Type below · यहाँ टाइप करें</p>
         <textarea
           ref={textareaRef}
-          className="w-full min-h-[148px] bg-white border-[1.5px] border-[#e0d3bc] rounded-xl text-[#1c1810] text-2xl sm:text-3xl font-[Arial_Unicode_MS,sans-serif] leading-relaxed p-4 sm:p-5 resize-y outline-none transition-all shadow-sm focus:border-[#c9a96e] focus:ring-[3px] focus:ring-[#c9a96e26]"
+          className="w-full min-h-[148px] bg-white border-[1.5px] border-[#e0d3bc] rounded-xl text-[#1c1810] text-2xl sm:text-3xl leading-relaxed p-4 sm:p-5 resize-y outline-none transition-all shadow-sm focus:border-[#c9a96e] focus:ring-[3px] focus:ring-[#c9a96e26]"
           value={text.replace(/\uE000/g, 'ि')}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -221,7 +221,10 @@ export default function MangalTypingApp() {
           placeholder={`यहाँ टाइप करें… (${currentLayout.name})`}
           autoFocus
           spellCheck={false}
-          style={{ caretColor: '#c9a96e' }}
+          style={{ 
+            caretColor: '#c9a96e',
+            fontFamily: currentLayout.fontType === 'legacy' ? '"Kruti Dev 010", sans-serif' : '"Arial Unicode MS", sans-serif'
+          }}
         />
         <div className="flex gap-2.5 mt-3">
           <button
@@ -268,11 +271,19 @@ export default function MangalTypingApp() {
                     }}
                   >
                     {shift !== normal && (
-                      <span className="absolute top-[3px] right-[5px] text-[0.45rem] sm:text-[0.55rem] text-[#b0a08a] font-sans leading-none">{shift}</span>
+                      <span 
+                        className="absolute top-[3px] right-[5px] text-[0.45rem] sm:text-[0.55rem] text-[#b0a08a] leading-none"
+                        style={{ fontFamily: currentLayout.fontType === 'legacy' ? '"Kruti Dev 010", sans-serif' : '"Arial Unicode MS", sans-serif' }}
+                      >
+                        {shift}
+                      </span>
                     )}
                     <span
-                      className="text-[0.8rem] sm:text-base font-sans leading-none text-[#2d2418]"
-                      style={{ color: isActive ? fingerColor : undefined }}
+                      className="text-[0.8rem] sm:text-base leading-none text-[#2d2418]"
+                      style={{ 
+                        color: isActive ? fingerColor : undefined,
+                        fontFamily: currentLayout.fontType === 'legacy' ? '"Kruti Dev 010", sans-serif' : '"Arial Unicode MS", sans-serif'
+                      }}
                     >
                       {normal}
                     </span>

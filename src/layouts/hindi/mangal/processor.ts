@@ -7,6 +7,12 @@ export const processMangalCombinations = (str: string): string => {
     prevText = str;
     // 1. Swap pending 'ि' (\uE000) with the following consonant and convert to real 'ि'
     str = str.replace(/\uE000([क-ह](?:्[क-ह])*(?:्)?)/g, '$1\u093F');
+    
+    // 1a. If a Halant is typed immediately after 'ि' (e.g. क + ि + ्), it means the user is trying to form a half-letter. Swap them to form (क + ् + ि).
+    str = str.replace(/\u093F्/g, '्\u093F');
+    
+    // 1b. If we have a Halant + 'ि' followed by a Consonant (e.g. क + ् + ि + त), swap the 'ि' to the end of the consonant (क + ् + त + ि).
+    str = str.replace(/्\u093F([क-ह])/g, '्$1\u093F');
   }
 
   // 2. Fix half-consonant + vertical bar (ा) -> full consonant
