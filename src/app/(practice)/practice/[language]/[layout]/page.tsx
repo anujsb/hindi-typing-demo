@@ -3,9 +3,10 @@ import { db } from "@/lib/db"
 import { exercises } from "@/lib/schema"
 import { eq, and } from "drizzle-orm"
 
-export default async function ExerciseList({ params }: { params: { language: string, layout: string } }) {
-  const langUpper = params.language.toUpperCase() as any;
-  const layoutUpper = params.layout.toUpperCase() as any;
+export default async function ExerciseList({ params }: { params: Promise<{ language: string, layout: string }> }) {
+  const resolvedParams = await params;
+  const langUpper = resolvedParams.language.toUpperCase() as any;
+  const layoutUpper = resolvedParams.layout.toUpperCase() as any;
 
   let exerciseList: typeof exercises.$inferSelect[] = [];
   try {
@@ -41,7 +42,7 @@ export default async function ExerciseList({ params }: { params: { language: str
             <ul role="list" className="divide-y divide-[#f0e9dc]">
               {exerciseList.map((exercise, idx) => (
                 <li key={exercise.id}>
-                  <Link href={`/practice/${params.language}/${params.layout}/exercise/${exercise.id}`} className="block hover:bg-[#fdfbf7] transition-colors group">
+                  <Link href={`/practice/${resolvedParams.language}/${resolvedParams.layout}/exercise/${exercise.id}`} className="block hover:bg-[#fdfbf7] transition-colors group">
                     <div className="px-6 py-6 sm:px-8 flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <span className="flex items-center justify-center w-10 h-10 rounded-full bg-[#f0e9dc] text-[#a0896a] font-mono text-sm font-bold group-hover:bg-[#c9a96e] group-hover:text-white transition-colors">

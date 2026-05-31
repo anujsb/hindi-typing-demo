@@ -7,11 +7,13 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { registerUser } from "@/actions/auth"
+import { INDIAN_STATES } from "@/lib/indianStates"
 
 export default function RegisterPage() {
   const router = useRouter()
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [selectedState, setSelectedState] = useState("")
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -74,12 +76,33 @@ export default function RegisterPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="district">District</Label>
-                <Input id="district" name="district" placeholder="(Optional)" />
+                <Label htmlFor="state">State</Label>
+                <select 
+                  id="state" 
+                  name="state" 
+                  value={selectedState}
+                  onChange={(e) => setSelectedState(e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-[#e8dcc8] bg-white px-3 py-2 text-sm text-[#1c1810] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c9a96e] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="">Select State</option>
+                  {Object.keys(INDIAN_STATES).map(state => (
+                    <option key={state} value={state}>{state}</option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="state">State</Label>
-                <Input id="state" name="state" placeholder="(Optional)" />
+                <Label htmlFor="district">District</Label>
+                <select 
+                  id="district" 
+                  name="district" 
+                  disabled={!selectedState}
+                  className="flex h-10 w-full rounded-md border border-[#e8dcc8] bg-white px-3 py-2 text-sm text-[#1c1810] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c9a96e] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="">Select District</option>
+                  {selectedState && INDIAN_STATES[selectedState]?.map(district => (
+                    <option key={district} value={district}>{district}</option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>

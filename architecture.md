@@ -150,14 +150,14 @@ Based on the provided flowchart, this document outlines the architecture, databa
   - [x] Implement Trial constraints (fixed 2-minute duration) vs Premium.
   - [x] Save user progress (WPM, Accuracy) to database on completion.
 
-- [ ] **Phase 4: Learning Module & Video Tutorials**
-  - [ ] Build Language & Layout Selection UI (`/learning`).
-  - [ ] Implement Video Tutorial List UI with Day-wise unlocking logic.
-  - [ ] Build Custom Video Player component.
-    - [ ] 1st time non-skippable, forward/speedup restricted.
-    - [ ] Save video completion status.
-    - [ ] Allow replay anytime after completion.
-  - [ ] Implement Day 4 Subscription Pop-up block.
+- [x] **Phase 4: Learning Module & Video Tutorials**
+  - [x] Build Language & Layout Selection UI (`/learning`).
+  - [x] Implement Video Tutorial List UI with Day-wise unlocking logic.
+  - [x] Build Custom Video Player component.
+    - [x] 1st time non-skippable, forward/speedup restricted.
+    - [x] Save video completion status.
+    - [x] Allow replay anytime after completion.
+  - [x] Implement Day 4 Subscription Pop-up block.
   - [ ] Link practice sessions to video completion (e.g., Day 1 Practice unlocks after Day 1 video).
 
 - [ ] **Phase 5: Dashboard & Subscription**

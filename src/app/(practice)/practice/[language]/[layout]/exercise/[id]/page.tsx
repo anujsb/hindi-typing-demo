@@ -5,7 +5,8 @@ import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import TypingEngine from "@/components/typing/TypingEngine"
 
-export default async function ExercisePage({ params }: { params: { language: string, layout: string, id: string } }) {
+export default async function ExercisePage({ params }: { params: Promise<{ language: string, layout: string, id: string }> }) {
+  const resolvedParams = await params;
   const session = await auth()
   
   if (!session?.user?.email) {
@@ -21,7 +22,7 @@ export default async function ExercisePage({ params }: { params: { language: str
   }
 
   // Fetch Exercise
-  const exerciseArray = await db.select().from(exercises).where(eq(exercises.id, params.id))
+  const exerciseArray = await db.select().from(exercises).where(eq(exercises.id, resolvedParams.id))
   const exercise = exerciseArray[0]
 
   if (!exercise) {
