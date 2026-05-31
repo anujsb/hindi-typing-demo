@@ -9,7 +9,7 @@ export function proxy(request: NextRequest) {
     request.cookies.get('next-auth.session-token')?.value ||
     request.cookies.get('__Secure-next-auth.session-token')?.value;
   
-  const protectedRoutes = ['/dashboard', '/practice', '/learning']
+  const protectedRoutes = ['/dashboard', '/practice', '/learning', '/admin']
   const isProtectedRoute = protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route))
 
   if (isProtectedRoute && !sessionToken) {

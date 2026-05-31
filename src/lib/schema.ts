@@ -5,6 +5,7 @@ export const languageEnum = pgEnum("language", ["ENGLISH", "HINDI", "MANGAL"]);
 export const layoutEnum = pgEnum("layout", ["KURTIDEV_010", "RAMINTON_GAIL", "INSCRIPT", "RAMINTON_GAIL_CBI"]);
 
 export const subscriptionStatusEnum = pgEnum("subscription_status", ["TRIAL", "PREMIUM"]);
+export const roleEnum = pgEnum("role", ["USER", "ADMIN"]);
 
 export const users = pgTable("user", {
   id: text("id")
@@ -19,6 +20,7 @@ export const users = pgTable("user", {
   examName: varchar("examName", { length: 255 }),
   district: varchar("district", { length: 255 }),
   state: varchar("state", { length: 255 }),
+  role: roleEnum("role").default("USER").notNull(),
   subscriptionStatus: subscriptionStatusEnum("subscriptionStatus").default("TRIAL"),
   subscriptionEndDate: timestamp("subscriptionEndDate", { mode: "date" }),
 })

@@ -21,6 +21,10 @@ Based on the provided flowchart, this document outlines the architecture, databa
 ### Navigation & Security Architecture
 - **Global Navigation**: A persistent Top Navbar (`<Navbar />`) across all protected routes (`/dashboard`, `/learning`, `/practice`) containing quick links, user profile, and sign out functionality. This is applied via route group layouts so it NEVER interferes with the `/demo` page.
 - **Route Protection**: A global `proxy.ts` running at the Edge strictly enforces authentication. Unauthenticated users attempting to access protected module paths are immediately redirected to `/login`.
+- **Admin Authentication (Highest Security)**: 
+  - Admins log in via a completely hidden route (`/secure-staff-login`) to prevent brute-force discovery.
+  - The Admin layout explicitly queries the database for `role === "ADMIN"`, actively bouncing standard users back to `/dashboard`.
+  - Admin login will enforce 2FA (Email OTP) in a future phase.
 
 ### Tech Stack
 - **Framework**: Next.js (App Router, Server Components, Server Actions)
@@ -41,6 +45,7 @@ Based on the provided flowchart, this document outlines the architecture, databa
    - `examName`: String
    - `district`: String
    - `state`: String
+   - `role`: Enum (USER, ADMIN)
    - `subscriptionStatus`: Enum (TRIAL, PREMIUM)
    - `subscriptionEndDate`: DateTime
    - `createdAt`, `updatedAt`
@@ -84,6 +89,11 @@ Based on the provided flowchart, this document outlines the architecture, databa
    - `videoId`: String
    - `completed`: Boolean
    - `unlockedAt`: DateTime
+
+7. **Exam** (Admin managed predefined exams)
+   - `id`: String (UUID)
+   - `name`: String (e.g., UPSSSC, SSC)
+   - `isActive`: Boolean
 
 ### File Structure (Next.js App Router)
 
@@ -166,7 +176,12 @@ Based on the provided flowchart, this document outlines the architecture, databa
   - [ ] Integrate Payment Gateway (e.g., Razorpay/Stripe).
   - [ ] Implement webhook to update user `subscriptionStatus` to PREMIUM.
 
-- [ ] **Phase 6: Refinement & Admin**
-  - [ ] General UI/UX Polish (Dark mode, animations).
-  - [ ] Admin panel (or script) to easily add new exercises with `SR_NAME_DATE` format.
+- [ ] **Phase 6: Admin Portal & Refinement**
+  - [ ] Add `role: USER | ADMIN` to User schema and create `Exams` table.
+  - [ ] Build secure Admin Layout (`/admin`) explicitly protected by `proxy.ts` role checks.
+  - [ ] Build Admin UI to manage Exercises (`/admin/exercises`) - Create/Edit passages.
+  - [ ] Build Admin UI to manage Video Tutorials (`/admin/videos`) - Assign day and URL.
+  - [ ] Build Admin UI to manage Exams (`/admin/exams`) - Populate dropdowns.
+  - [ ] Build Admin UI for User Management (`/admin/users`) - View progress/subscriptions.
+  - [ ] General UI/UX Polish.
   - [ ] Testing and final bug fixes.
