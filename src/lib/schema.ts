@@ -1,5 +1,8 @@
-import { timestamp, pgTable, text, primaryKey, integer, varchar, pgEnum } from "drizzle-orm/pg-core"
+import { timestamp, pgTable, text, primaryKey, integer, varchar, pgEnum, boolean, real } from "drizzle-orm/pg-core"
 import type { AdapterAccountType } from "next-auth/adapters"
+
+export const languageEnum = pgEnum("language", ["ENGLISH", "HINDI", "MANGAL"]);
+export const layoutEnum = pgEnum("layout", ["KURTIDEV_010", "RAMINTON_GAIL", "INSCRIPT", "RAMINTON_GAIL_CBI"]);
 
 export const subscriptionStatusEnum = pgEnum("subscription_status", ["TRIAL", "PREMIUM"]);
 
@@ -65,3 +68,44 @@ export const verificationTokens = pgTable(
     }),
   })
 )
+
+export const exercises = pgTable("exercise", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  srNameDate: varchar("sr_name_date", { length: 255 }).notNull().unique(),
+  title: varchar("title", { length: 255 }).notNull(),
+  language: languageEnum("language").notNull(),
+  layout: layoutEnum("layout").notNull(),
+  content: text("content").notNull(),
+  isPremium: boolean("is_premium").default(false).notNull(),
+  orderIndex: integer("order_index").notNull(),
+});
+
+export const userExerciseProgress = pgTable("user_exercise_progress", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  exerciseId: text("exercise_id").notNull().references(() => exercises.id, { onDelete: "cascade" }),
+  wpm: real("wpm").notNull(),
+  accuracy: real("accuracy").notNull(),
+  timeTaken: integer("time_taken").notNull(),
+  completedAt: timestamp("completed_at", { mode: "date" }).defaultNow(),
+});
+
+export const videoTutorials = pgTable("video_tutorial", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  day: integer("day").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  videoUrl: text("video_url").notNull(),
+  language: languageEnum("language").notNull(),
+  layout: layoutEnum("layout").notNull(),
+  isPremium: boolean("is_premium").default(false).notNull(),
+});
+
+export const userVideoProgress = pgTable("user_video_progress", {
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  videoId: text("video_id").notNull().references(() => videoTutorials.id, { onDelete: "cascade" }),
+  completed: boolean("completed").default(false).notNull(),
+  unlockedAt: timestamp("unlocked_at", { mode: "date" }).defaultNow(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.userId, t.videoId] })
+}));

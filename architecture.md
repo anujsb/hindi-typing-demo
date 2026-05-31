@@ -12,6 +12,12 @@ Based on the provided flowchart, this document outlines the architecture, databa
 
 ## Proposed Architecture
 
+### Design System & UI Guidelines
+- **Theme**: Light-themed, highly aesthetic, clean, and simple.
+- **Visuals**: Premium feel matching the `/demo` page aesthetic. Uses smooth transitions, glassmorphism, subtle expansive shadows, and curated harmonious color palettes (`#faf7f2` backgrounds, `#c9a96e` primary accents, `#1c1810` text). Avoids generic basic colors.
+- **Consistency**: High visual consistency across all pages (buttons, inputs, cards, typography).
+- **Typography**: Modern clean typography for UI, with elegant serif headers to match the typing experience.
+
 ### Tech Stack
 - **Framework**: Next.js (App Router, Server Components, Server Actions)
 - **Database**: Neon DB (Serverless PostgreSQL)
@@ -119,24 +125,26 @@ Based on the provided flowchart, this document outlines the architecture, databa
 ## Implementation Phases and Tasks
 
 - [ ] **Phase 1: Foundation & Authentication**
-  - [ ] Set up Neon DB and configure Drizzle ORM in the existing Next.js app.
-  - [ ] Create Database schema for `User` and `VerificationToken`.
+  - [x] Set up Neon DB and configure Drizzle ORM in the existing Next.js app.
+  - [x] Create Database schema for `User` and `VerificationToken`.
   - [ ] Integrate NextAuth.js (Credentials & Resend Email Provider).
-  - [ ] Build Registration Page (Full Name, Mobile, Email, Exam, Dist, State).
-  - [ ] Build Login Page.
+  - [x] Build Registration Page (Full Name, Mobile, Email, Exam, Dist, State).
+  - [x] Build Login Page.
   - [ ] Build Forgot Password and Reset Password flows.
+  - [x] Build Premium Home Page mapping out Trial / Subscribe flows.
+  - [x] Apply Premium UI Design System across all views.
 
 - [ ] **Phase 2: Database & Core Models**
-  - [ ] Create Database schema for `Exercise`, `UserExerciseProgress`.
-  - [ ] Create Database schema for `VideoTutorial`, `UserVideoProgress`.
-  - [ ] Create initial seed script for basic exercises (Free & Premium) and Video Tutorials (Day 1-4).
+  - [x] Create Database schema for `Exercise`, `UserExerciseProgress`.
+  - [x] Create Database schema for `VideoTutorial`, `UserVideoProgress`.
+  - [x] Create initial seed script for basic exercises (Free & Premium) and Video Tutorials (Day 1-4).
   
 - [ ] **Phase 3: Core Practice Module (Typing Engine)**
-  - [ ] Build Language & Layout Selection UI (`/practice`).
-  - [ ] Build Exercise List UI (`/practice/[language]/[layout]`), distinguishing Trial vs Premium.
-  - [ ] Integrate existing Hindi typing logic into a reusable `<TypingEngine />` component.
-  - [ ] Implement Trial constraints (fixed 2-minute duration) vs Premium.
-  - [ ] Save user progress (WPM, Accuracy) to database on completion.
+  - [x] Build Language & Layout Selection UI (`/practice`).
+  - [x] Build Exercise List UI (`/practice/[language]/[layout]`), distinguishing Trial vs Premium.
+  - [x] Integrate existing Hindi typing logic into a reusable `<TypingEngine />` component.
+  - [x] Implement Trial constraints (fixed 2-minute duration) vs Premium.
+  - [x] Save user progress (WPM, Accuracy) to database on completion.
 
 - [ ] **Phase 4: Learning Module & Video Tutorials**
   - [ ] Build Language & Layout Selection UI (`/learning`).
