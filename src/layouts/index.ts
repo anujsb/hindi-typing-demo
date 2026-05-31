@@ -1,5 +1,5 @@
 import { LayoutDefinition } from './types';
-import { INSCRIPT_NORMAL, INSCRIPT_SHIFT } from './hindi/mangal/inscript';
+import { INSCRIPT_NORMAL, INSCRIPT_SHIFT, INSCRIPT_ALT_MAP } from './hindi/mangal/inscript';
 import { REMINGTON_NORMAL, REMINGTON_SHIFT, REMINGTON_ALT_MAP } from './hindi/mangal/remington-gail';
 import { REMINGTON_CBI_NORMAL, REMINGTON_CBI_SHIFT } from './hindi/mangal/remington-gail-cbi';
 import { processMangalCombinations } from './hindi/mangal/processor';
@@ -20,6 +20,7 @@ export const layouts: Record<string, LayoutDefinition> = {
     fontType: "unicode",
     normalMap: INSCRIPT_NORMAL,
     shiftMap: INSCRIPT_SHIFT,
+    altCodeMap: INSCRIPT_ALT_MAP
     // Inscript relies purely on OS Unicode shaping, no manual layout-level processing needed like Remington
   },
   remington: {
