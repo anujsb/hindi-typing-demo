@@ -1,6 +1,6 @@
 import { LayoutDefinition } from './types';
 import { INSCRIPT_NORMAL, INSCRIPT_SHIFT } from './hindi/mangal/inscript';
-import { REMINGTON_NORMAL, REMINGTON_SHIFT } from './hindi/mangal/remington-gail';
+import { REMINGTON_NORMAL, REMINGTON_SHIFT, REMINGTON_ALT_MAP } from './hindi/mangal/remington-gail';
 import { REMINGTON_CBI_NORMAL, REMINGTON_CBI_SHIFT } from './hindi/mangal/remington-gail-cbi';
 import { processMangalCombinations } from './hindi/mangal/processor';
 import { KRUTIDEV_NORMAL, KRUTIDEV_SHIFT, KRUTIDEV_ALT_MAP, processKrutidevCombinations } from './hindi/krutidev/krutidev010';
@@ -28,7 +28,8 @@ export const layouts: Record<string, LayoutDefinition> = {
     fontType: "unicode",
     normalMap: REMINGTON_NORMAL,
     shiftMap: REMINGTON_SHIFT,
-    processor: processMangalCombinations
+    processor: processMangalCombinations,
+    altCodeMap: REMINGTON_ALT_MAP
   },
   remington_cbi: {
     id: "remington_cbi",
@@ -36,7 +37,8 @@ export const layouts: Record<string, LayoutDefinition> = {
     fontType: "unicode",
     normalMap: REMINGTON_CBI_NORMAL,
     shiftMap: REMINGTON_CBI_SHIFT,
-    processor: processMangalCombinations
+    processor: processMangalCombinations,
+    altCodeMap: REMINGTON_ALT_MAP
   },
   krutidev: {
     id: "krutidev",
