@@ -64,7 +64,7 @@ export default function SecureAdminLogin() {
                 name="email" 
                 type="email" 
                 required 
-                className="bg-[#262015] border-[#332b1e] text-white focus-visible:ring-[#c9a96e]"
+                className="!bg-[#262015] !border-[#332b1e] !text-white focus-visible:ring-[#c9a96e]"
               />
             </div>
             <div className="space-y-2">
@@ -74,7 +74,7 @@ export default function SecureAdminLogin() {
                 name="password" 
                 type="password" 
                 required 
-                className="bg-[#262015] border-[#332b1e] text-white focus-visible:ring-[#c9a96e]"
+                className="!bg-[#262015] !border-[#332b1e] !text-white focus-visible:ring-[#c9a96e]"
               />
             </div>
             

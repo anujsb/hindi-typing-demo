@@ -19,11 +19,11 @@ export default async function AdminDashboard() {
           <p className="text-4xl font-bold text-[#c9a96e]">{userCount}</p>
         </div>
         <div className="bg-[#262015] p-6 rounded-2xl border border-[#332b1e]">
-          <h3 className="text-[#a0896a] text-sm font-bold uppercase tracking-wider mb-2">Total Exercises</h3>
+          <h3 className="text-[#a0896a] text-sm font-bold uppercase tracking-wider mb-2">Practice Module</h3>
           <p className="text-4xl font-bold text-[#c9a96e]">{exerciseCount}</p>
         </div>
         <div className="bg-[#262015] p-6 rounded-2xl border border-[#332b1e]">
-          <h3 className="text-[#a0896a] text-sm font-bold uppercase tracking-wider mb-2">Video Tutorials</h3>
+          <h3 className="text-[#a0896a] text-sm font-bold uppercase tracking-wider mb-2">Learning Module</h3>
           <p className="text-4xl font-bold text-[#c9a96e]">{videoCount}</p>
         </div>
       </div>

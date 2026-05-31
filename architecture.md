@@ -176,11 +176,11 @@ Based on the provided flowchart, this document outlines the architecture, databa
   - [ ] Integrate Payment Gateway (e.g., Razorpay/Stripe).
   - [ ] Implement webhook to update user `subscriptionStatus` to PREMIUM.
 
-- [ ] **Phase 6: Admin Portal & Refinement**
-  - [ ] Add `role: USER | ADMIN` to User schema and create `Exams` table.
-  - [ ] Build secure Admin Layout (`/admin`) explicitly protected by `proxy.ts` role checks.
-  - [ ] Build Admin UI to manage Exercises (`/admin/exercises`) - Create/Edit passages.
-  - [ ] Build Admin UI to manage Video Tutorials (`/admin/videos`) - Assign day and URL.
+- [x] **Phase 6: Admin Portal & Refinement**
+  - [x] Add `role: USER | ADMIN` to User schema and create `Exams` table.
+  - [x] Build secure Admin Layout (`/admin`) explicitly protected by `proxy.ts` role checks.
+  - [x] Build Admin UI to manage Exercises (`/admin/exercises`) - Create/Edit passages (Supports .txt upload & paste).
+  - [x] Build Admin UI to manage Video Tutorials (`/admin/videos`) - Assign day and URL.
   - [ ] Build Admin UI to manage Exams (`/admin/exams`) - Populate dropdowns.
   - [ ] Build Admin UI for User Management (`/admin/users`) - View progress/subscriptions.
   - [ ] General UI/UX Polish.
