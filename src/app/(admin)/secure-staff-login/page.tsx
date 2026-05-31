@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 
-export default function SecureAdminLogin() {
+function SecureAdminLoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams?.get("callbackUrl") || "/admin"
@@ -87,5 +87,13 @@ export default function SecureAdminLogin() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function SecureAdminLogin() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-[#14110a] text-[#faf7f2]">Loading secure gateway...</div>}>
+      <SecureAdminLoginForm />
+    </Suspense>
   )
 }
