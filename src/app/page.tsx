@@ -140,14 +140,22 @@ export default function MangalTypingApp() {
     bottom: "38px",
   };
 
+  const US_SHIFT_MAP: Record<string, string> = {
+    "`": "~", "1": "!", "2": "@", "3": "#", "4": "$", "5": "%", "6": "^", "7": "&", "8": "*", "9": "(", "0": ")", "-": "_", "=": "+",
+    "[": "{", "]": "}", "\\": "|", ";": ":", "'": "\"", ",": "<", ".": ">", "/": "?"
+  };
+
   // Generate dynamic key rows based on layout
   const KEY_ROWS: RowDef[] = ENGLISH_ROWS.map(r => ({
     row: r.row,
-    keys: r.keys.map(k => ({
-      key: k,
-      normal: normalMap[k] || k,
-      shift: shiftMap[k.toUpperCase()] || shiftMap[k] || k
-    }))
+    keys: r.keys.map(k => {
+      const shiftKey = US_SHIFT_MAP[k] || k.toUpperCase();
+      return {
+        key: k,
+        normal: normalMap[k] || k,
+        shift: shiftMap[shiftKey] || shiftMap[k.toUpperCase()] || shiftMap[k] || shiftKey
+      };
+    })
   }));
 
   return (
