@@ -32,7 +32,7 @@ export default function LoginPage() {
       if (result?.error) {
         setError("Invalid email or password")
       } else if (result?.ok) {
-        router.push("/practice")
+        router.push("/dashboard")
         router.refresh()
       }
     } catch (err) {

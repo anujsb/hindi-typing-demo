@@ -18,6 +18,10 @@ Based on the provided flowchart, this document outlines the architecture, databa
 - **Consistency**: High visual consistency across all pages (buttons, inputs, cards, typography).
 - **Typography**: Modern clean typography for UI, with elegant serif headers to match the typing experience.
 
+### Navigation & Security Architecture
+- **Global Navigation**: A persistent Top Navbar (`<Navbar />`) across all protected routes (`/dashboard`, `/learning`, `/practice`) containing quick links, user profile, and sign out functionality. This is applied via route group layouts so it NEVER interferes with the `/demo` page.
+- **Route Protection**: A global `proxy.ts` running at the Edge strictly enforces authentication. Unauthenticated users attempting to access protected module paths are immediately redirected to `/login`.
+
 ### Tech Stack
 - **Framework**: Next.js (App Router, Server Components, Server Actions)
 - **Database**: Neon DB (Serverless PostgreSQL)
