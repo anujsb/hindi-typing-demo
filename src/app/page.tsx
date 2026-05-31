@@ -47,6 +47,24 @@ export default function MangalTypingApp() {
   const charCount = text.length;
   const wordCount = text.trim() ? text.trim().split(/\s+/).filter((w) => w.length > 0).length : 0;
 
+  const insertTextAtCursor = useCallback((textToInsert: string) => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    const start = ta.selectionStart ?? 0;
+    const end = ta.selectionEnd ?? 0;
+    const newTextUnfixed = text.slice(0, start) + textToInsert + text.slice(end);
+    const newTextFixed = processor ? processor(newTextUnfixed) : newTextUnfixed;
+    setText(newTextFixed);
+    requestAnimationFrame(() => {
+      if (ta) {
+        const newCursor = start + textToInsert.length + (newTextFixed.length - newTextUnfixed.length);
+        ta.selectionStart = newCursor;
+        ta.selectionEnd = newCursor;
+        ta.focus();
+      }
+    });
+  }, [text, processor]);
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === "Shift") return;
@@ -75,34 +93,14 @@ export default function MangalTypingApp() {
 
       if (mapped !== undefined) {
         e.preventDefault();
-        const ta = textareaRef.current;
-        if (!ta) return;
-
-        const start = ta.selectionStart ?? 0;
-        const end = ta.selectionEnd ?? 0;
-        const newTextUnfixed = text.slice(0, start) + mapped + text.slice(end);
+        insertTextAtCursor(mapped);
         
-        // Apply combination fixes if layout has a processor
-        const newTextFixed = processor ? processor(newTextUnfixed) : newTextUnfixed;
-        
-        setText(newTextFixed);
-
-        const lengthDiff = newTextFixed.length - newTextUnfixed.length;
-
-        requestAnimationFrame(() => {
-          if (ta) {
-            const newCursor = start + mapped.length + lengthDiff;
-            ta.selectionStart = newCursor;
-            ta.selectionEnd = newCursor;
-          }
-        });
-
         setActiveKey(lowerKey);
         if (activeKeyTimeout.current) clearTimeout(activeKeyTimeout.current);
         activeKeyTimeout.current = setTimeout(() => setActiveKey(null), 150);
       }
     },
-    [text, normalMap, shiftMap, processor]
+    [normalMap, shiftMap, insertTextAtCursor]
   );
 
   const handleKeyUp = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -110,27 +108,12 @@ export default function MangalTypingApp() {
       if (altCodeMap) {
         const mapped = altCodeMap[altBuffer.current];
         if (mapped) {
-          const ta = textareaRef.current;
-          if (ta) {
-            const start = ta.selectionStart ?? 0;
-            const end = ta.selectionEnd ?? 0;
-            const newTextUnfixed = text.slice(0, start) + mapped + text.slice(end);
-            const newTextFixed = processor ? processor(newTextUnfixed) : newTextUnfixed;
-            setText(newTextFixed);
-
-            requestAnimationFrame(() => {
-              if (ta) {
-                const newCursor = start + mapped.length + (newTextFixed.length - newTextUnfixed.length);
-                ta.selectionStart = newCursor;
-                ta.selectionEnd = newCursor;
-              }
-            });
-          }
+          insertTextAtCursor(mapped);
         }
       }
       altBuffer.current = "";
     }
-  }, [altCodeMap, processor, text]);
+  }, [altCodeMap, insertTextAtCursor]);
 
   const handleClear = () => {
     setText("");
@@ -316,6 +299,31 @@ export default function MangalTypingApp() {
                 <span className="text-[#c9b99a] text-[0.7rem]">→</span>
                 <span className="font-sans text-[#1c1810]">{hindi}</span>
               </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Alt Codes Ref */}
+      {altCodeMap && Object.keys(altCodeMap).length > 0 && (
+        <div className="max-w-[800px] mx-auto mt-6 bg-white border border-[#e8dcc8] rounded-xl p-4 sm:px-5 shadow-sm">
+          <p className="font-mono text-[0.65rem] uppercase tracking-[0.16em] text-[#a0896a] mb-3">Special Characters (Alt Codes)</p>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(altCodeMap).map(([code, char]) => (
+              <button 
+                key={code} 
+                className="bg-[#faf7f2] hover:bg-[#f0e9dc] border border-[#e8dcc8] hover:border-[#c9a96e] rounded-md py-2 px-3 flex flex-col items-center justify-center gap-1.5 transition-all outline-none focus:border-[#c9a96e] focus:ring-[2px] focus:ring-[#c9a96e26]"
+                onClick={() => insertTextAtCursor(char)}
+                title={`Hold Alt and type ${code} on Numpad`}
+              >
+                <span 
+                  className="text-[#1c1810] text-2xl leading-none" 
+                  style={{ fontFamily: currentLayout.fontType === 'legacy' ? '"Kruti Dev 010", sans-serif' : '"Arial Unicode MS", sans-serif' }}
+                >
+                  {char}
+                </span>
+                <span className="font-mono text-[0.55rem] text-[#a0896a]">Alt+{code}</span>
+              </button>
             ))}
           </div>
         </div>
