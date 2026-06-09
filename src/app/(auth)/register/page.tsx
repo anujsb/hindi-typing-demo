@@ -20,7 +20,7 @@ export default function RegisterPage() {
     setLoading(true)
     setError("")
     const formData = new FormData(e.currentTarget)
-    
+
     try {
       const result = await registerUser(formData)
       if (result.error) {
@@ -46,11 +46,11 @@ export default function RegisterPage() {
 
         <form onSubmit={onSubmit} className="mt-8 space-y-6 font-sans">
           {error && <div className="rounded-xl bg-red-50 p-4 text-sm text-red-600 border border-red-100">{error}</div>}
-          
+
           <div className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="fullName">Full Name *</Label>
-              <Input id="fullName" name="fullName" required placeholder="Aarav Sharma" />
+              <Input id="fullName" name="fullName" required placeholder="Your Name" />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -77,9 +77,9 @@ export default function RegisterPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="state">State</Label>
-                <select 
-                  id="state" 
-                  name="state" 
+                <select
+                  id="state"
+                  name="state"
                   value={selectedState}
                   onChange={(e) => setSelectedState(e.target.value)}
                   className="flex h-10 w-full rounded-md border border-[#e8dcc8] bg-white px-3 py-2 text-sm text-[#1c1810] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c9a96e] disabled:cursor-not-allowed disabled:opacity-50"
@@ -92,9 +92,9 @@ export default function RegisterPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="district">District</Label>
-                <select 
-                  id="district" 
-                  name="district" 
+                <select
+                  id="district"
+                  name="district"
                   disabled={!selectedState}
                   className="flex h-10 w-full rounded-md border border-[#e8dcc8] bg-white px-3 py-2 text-sm text-[#1c1810] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c9a96e] disabled:cursor-not-allowed disabled:opacity-50"
                 >
