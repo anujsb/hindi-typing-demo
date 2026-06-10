@@ -1,15 +1,18 @@
 "use client"
 
 import { useState } from "react"
-import { addExercise } from "@/actions/admin"
+import { addExercise, updateExercise } from "@/actions/admin"
 import { useRouter } from "next/navigation"
+import { exercises } from "@/lib/schema"
 
-export default function ExerciseForm() {
+export default function ExerciseForm({ initialData }: { initialData?: typeof exercises.$inferSelect }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const [textContent, setTextContent] = useState("")
-  const [language, setLanguage] = useState<"ENGLISH" | "HINDI" | "MANGAL">("ENGLISH")
+  const [textContent, setTextContent] = useState(initialData?.content || "")
+  const [language, setLanguage] = useState<"ENGLISH" | "HINDI" | "MANGAL">(
+    (initialData?.language as any) || "ENGLISH"
+  )
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -30,21 +33,29 @@ export default function ExerciseForm() {
     
     const formData = new FormData(e.currentTarget)
     
-    const result = await addExercise({
+    const payload = {
       srNameDate: formData.get("srNameDate") as string,
       title: formData.get("title") as string,
       language: language,
-      layout: language === "ENGLISH" ? "STANDARD" : (formData.get("layout") as "KURTIDEV_010" | "RAMINTON_GAIL" | "INSCRIPT" | "RAMINTON_GAIL_CBI" | "STANDARD"),
+      layout: language === "ENGLISH" ? "STANDARD" as const : (formData.get("layout") as any),
       content: textContent,
       isPremium: formData.get("isPremium") === "on",
       orderIndex: parseInt(formData.get("orderIndex") as string, 10)
-    })
+    }
+
+    const result = initialData 
+      ? await updateExercise(initialData.id, payload)
+      : await addExercise(payload)
 
     if (result.error) {
       setError(result.error)
     } else {
-      setTextContent("")
-      ;(e.target as HTMLFormElement).reset()
+      if (!initialData) {
+        setTextContent("")
+        ;(e.target as HTMLFormElement).reset()
+      } else {
+        router.push("/admin/practice-module")
+      }
       router.refresh()
     }
     setLoading(false)
@@ -52,17 +63,19 @@ export default function ExerciseForm() {
 
   return (
     <form onSubmit={onSubmit} className="bg-[#262015] p-6 rounded-2xl border border-[#332b1e] space-y-4 font-sans text-sm mt-6">
-      <h3 className="text-xl font-bold text-[#faf7f2] mb-4">Add New Exam (Practice Module)</h3>
+      <h3 className="text-xl font-bold text-[#faf7f2] mb-4">
+        {initialData ? "Edit Exam" : "Add New Exam (Practice Module)"}
+      </h3>
       {error && <div className="p-3 bg-red-900/50 text-red-300 rounded border border-red-800">{error}</div>}
       
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
           <label className="text-[#a0896a]">SR_NAME_DATE (Unique)</label>
-          <input required name="srNameDate" placeholder="001_Example_290526" className="w-full bg-[#1c1810] border-[#332b1e] rounded px-3 py-2 text-white" />
+          <input required name="srNameDate" defaultValue={initialData?.srNameDate} placeholder="001_Example_290526" className="w-full bg-[#1c1810] border-[#332b1e] rounded px-3 py-2 text-white" />
         </div>
         <div className="space-y-1">
           <label className="text-[#a0896a]">Display Title</label>
-          <input required name="title" placeholder="The Quick Brown Fox" className="w-full bg-[#1c1810] border-[#332b1e] rounded px-3 py-2 text-white" />
+          <input required name="title" defaultValue={initialData?.title} placeholder="The Quick Brown Fox" className="w-full bg-[#1c1810] border-[#332b1e] rounded px-3 py-2 text-white" />
         </div>
       </div>
 
@@ -79,7 +92,7 @@ export default function ExerciseForm() {
         {language !== "ENGLISH" && (
           <div className="space-y-1">
             <label className="text-[#a0896a]">Layout</label>
-            <select required name="layout" className="w-full bg-[#1c1810] border-[#332b1e] rounded px-3 py-2 text-white">
+            <select required name="layout" defaultValue={initialData?.layout || "KURTIDEV_010"} className="w-full bg-[#1c1810] border-[#332b1e] rounded px-3 py-2 text-white">
               <option value="KURTIDEV_010">KrutiDev 010</option>
               <option value="RAMINTON_GAIL">Remington Gail</option>
               <option value="INSCRIPT">Inscript</option>
@@ -92,10 +105,10 @@ export default function ExerciseForm() {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
           <label className="text-[#a0896a]">Order Index (Sequence)</label>
-          <input required type="number" name="orderIndex" defaultValue="1" className="w-full bg-[#1c1810] border-[#332b1e] rounded px-3 py-2 text-white" />
+          <input required type="number" name="orderIndex" defaultValue={initialData?.orderIndex ?? 1} className="w-full bg-[#1c1810] border-[#332b1e] rounded px-3 py-2 text-white" />
         </div>
         <div className="flex items-center space-x-2 pt-6">
-          <input type="checkbox" id="isPremium" name="isPremium" className="w-4 h-4 rounded bg-[#1c1810] border-[#332b1e] accent-[#c9a96e]" />
+          <input type="checkbox" id="isPremium" name="isPremium" defaultChecked={initialData?.isPremium} className="w-4 h-4 rounded bg-[#1c1810] border-[#332b1e] accent-[#c9a96e]" />
           <label htmlFor="isPremium" className="text-[#a0896a]">Is Premium (Requires Subscription)</label>
         </div>
       </div>
@@ -121,7 +134,7 @@ export default function ExerciseForm() {
       </div>
 
       <button disabled={loading} type="submit" className="w-full py-3 bg-[#c9a96e] text-white rounded font-bold hover:bg-[#b5955a] transition-colors mt-2">
-        {loading ? "Saving..." : "Save Exam"}
+        {loading ? "Saving..." : (initialData ? "Update Exam" : "Save Exam")}
       </button>
     </form>
   )

@@ -25,7 +25,7 @@ export async function addExercise(data: {
   await requireAdmin()
   try {
     await db.insert(exercises).values(data)
-    revalidatePath("/admin/exercises")
+    revalidatePath("/admin/practice-module")
     // Revalidate frontend cache
     revalidatePath(`/practice/${data.language}/${data.layout}`)
     return { success: true }
@@ -47,8 +47,75 @@ export async function addVideo(data: {
   await requireAdmin()
   try {
     await db.insert(videoTutorials).values(data)
-    revalidatePath("/admin/videos")
+    revalidatePath("/admin/learning-module")
     revalidatePath(`/learning/${data.language}/${data.layout}`)
+    return { success: true }
+  } catch (error: any) {
+    return { error: error.message }
+  }
+}
+
+export async function updateVideo(id: string, data: Partial<{
+  day: number;
+  title: string;
+  description: string;
+  videoUrl: string;
+  practiceTestContent: string;
+  language: "ENGLISH" | "HINDI" | "MANGAL";
+  layout: "KURTIDEV_010" | "RAMINTON_GAIL" | "INSCRIPT" | "RAMINTON_GAIL_CBI" | "STANDARD";
+  isPremium: boolean;
+}>) {
+  await requireAdmin()
+  try {
+    await db.update(videoTutorials).set(data).where(eq(videoTutorials.id, id))
+    revalidatePath("/admin/learning-module")
+    if (data.language && data.layout) {
+      revalidatePath(`/learning/${data.language}/${data.layout}`)
+    }
+    return { success: true }
+  } catch (error: any) {
+    return { error: error.message }
+  }
+}
+
+export async function deleteVideo(id: string) {
+  await requireAdmin()
+  try {
+    await db.delete(videoTutorials).where(eq(videoTutorials.id, id))
+    revalidatePath("/admin/learning-module")
+    return { success: true }
+  } catch (error: any) {
+    return { error: error.message }
+  }
+}
+
+export async function updateExercise(id: string, data: Partial<{
+  srNameDate: string;
+  title: string;
+  language: "ENGLISH" | "HINDI" | "MANGAL";
+  layout: "KURTIDEV_010" | "RAMINTON_GAIL" | "INSCRIPT" | "RAMINTON_GAIL_CBI" | "STANDARD";
+  content: string;
+  isPremium: boolean;
+  orderIndex: number;
+}>) {
+  await requireAdmin()
+  try {
+    await db.update(exercises).set(data).where(eq(exercises.id, id))
+    revalidatePath("/admin/practice-module")
+    if (data.language && data.layout) {
+      revalidatePath(`/practice/${data.language}/${data.layout}`)
+    }
+    return { success: true }
+  } catch (error: any) {
+    return { error: error.message }
+  }
+}
+
+export async function deleteExercise(id: string) {
+  await requireAdmin()
+  try {
+    await db.delete(exercises).where(eq(exercises.id, id))
+    revalidatePath("/admin/practice-module")
     return { success: true }
   } catch (error: any) {
     return { error: error.message }

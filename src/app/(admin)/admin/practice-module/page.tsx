@@ -1,6 +1,8 @@
 import { db } from "@/lib/db"
 import { exercises } from "@/lib/schema"
 import ExerciseForm from "@/components/admin/ExerciseForm"
+import DeleteButton from "@/components/admin/DeleteButton"
+import Link from "next/link"
 
 export default async function AdminExercises() {
   const existingExercises = await db.select().from(exercises).orderBy(exercises.orderIndex)
@@ -23,12 +25,13 @@ export default async function AdminExercises() {
               <th className="px-6 py-4 font-semibold">Language</th>
               <th className="px-6 py-4 font-semibold">Lang / Layout</th>
               <th className="px-6 py-4 font-semibold">Premium</th>
+              <th className="px-6 py-4 font-semibold text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#332b1e] text-white">
             {existingExercises.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-[#7a6344]">No exams found.</td>
+                <td colSpan={6} className="px-6 py-8 text-center text-[#7a6344]">No exams found.</td>
               </tr>
             ) : (
               existingExercises.map(ex => (
@@ -39,6 +42,12 @@ export default async function AdminExercises() {
                   <td className="px-6 py-4 text-xs text-[#a0896a]">{ex.language} • {ex.layout}</td>
                   <td className="px-6 py-4">
                     {ex.isPremium ? <span className="text-[#c9a96e]">Yes</span> : <span className="text-[#7a6344]">No</span>}
+                  </td>
+                  <td className="px-6 py-4 text-right space-x-4">
+                    <Link href={`/admin/practice-module/${ex.id}`} className="text-[#a0896a] hover:text-white transition-colors font-semibold">
+                      Edit
+                    </Link>
+                    <DeleteButton id={ex.id} type="exercise" />
                   </td>
                 </tr>
               ))

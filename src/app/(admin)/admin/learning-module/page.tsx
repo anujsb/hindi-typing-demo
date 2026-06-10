@@ -1,6 +1,8 @@
 import { db } from "@/lib/db"
 import { videoTutorials } from "@/lib/schema"
 import VideoForm from "@/components/admin/VideoForm"
+import DeleteButton from "@/components/admin/DeleteButton"
+import Link from "next/link"
 
 export default async function AdminVideos() {
   const existingVideos = await db.select().from(videoTutorials).orderBy(videoTutorials.day)
@@ -22,12 +24,13 @@ export default async function AdminVideos() {
               <th className="px-6 py-4 font-semibold">Title</th>
               <th className="px-6 py-4 font-semibold">Lang / Layout</th>
               <th className="px-6 py-4 font-semibold">Premium</th>
+              <th className="px-6 py-4 font-semibold text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#332b1e] text-white">
             {existingVideos.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-6 py-8 text-center text-[#7a6344]">No learning videos found.</td>
+                <td colSpan={5} className="px-6 py-8 text-center text-[#7a6344]">No learning videos found.</td>
               </tr>
             ) : (
               existingVideos.map(vid => (
@@ -37,6 +40,12 @@ export default async function AdminVideos() {
                   <td className="px-6 py-4 text-xs text-[#a0896a]">{vid.language} • {vid.layout}</td>
                   <td className="px-6 py-4">
                     {vid.isPremium ? <span className="text-[#c9a96e]">Yes</span> : <span className="text-[#7a6344]">No</span>}
+                  </td>
+                  <td className="px-6 py-4 text-right space-x-4">
+                    <Link href={`/admin/learning-module/${vid.id}`} className="text-[#a0896a] hover:text-white transition-colors font-semibold">
+                      Edit
+                    </Link>
+                    <DeleteButton id={vid.id} type="video" />
                   </td>
                 </tr>
               ))
