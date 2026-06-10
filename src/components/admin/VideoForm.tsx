@@ -24,7 +24,7 @@ export default function VideoForm() {
       videoUrl: formData.get("videoUrl") as string,
       practiceTestContent: formData.get("practiceTestContent") as string,
       language: language,
-      layout: language === "ENGLISH" ? "NONE" : (formData.get("layout") as "KURTIDEV_010" | "RAMINTON_GAIL" | "INSCRIPT" | "RAMINTON_GAIL_CBI" | "NONE"),
+      layout: language === "ENGLISH" ? "STANDARD" : (formData.get("layout") as "KURTIDEV_010" | "RAMINTON_GAIL" | "INSCRIPT" | "RAMINTON_GAIL_CBI" | "STANDARD"),
       isPremium: formData.get("isPremium") === "on",
     })
 

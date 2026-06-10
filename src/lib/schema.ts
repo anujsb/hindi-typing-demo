@@ -2,7 +2,7 @@ import { timestamp, pgTable, text, primaryKey, integer, varchar, pgEnum, boolean
 import type { AdapterAccountType } from "next-auth/adapters"
 
 export const languageEnum = pgEnum("language", ["ENGLISH", "HINDI", "MANGAL"]);
-export const layoutEnum = pgEnum("layout", ["KURTIDEV_010", "RAMINTON_GAIL", "INSCRIPT", "RAMINTON_GAIL_CBI", "NONE"]);
+export const layoutEnum = pgEnum("layout", ["KURTIDEV_010", "RAMINTON_GAIL", "INSCRIPT", "RAMINTON_GAIL_CBI", "STANDARD"]);
 
 export const subscriptionStatusEnum = pgEnum("subscription_status", ["TRIAL", "PREMIUM"]);
 export const roleEnum = pgEnum("role", ["USER", "ADMIN"]);

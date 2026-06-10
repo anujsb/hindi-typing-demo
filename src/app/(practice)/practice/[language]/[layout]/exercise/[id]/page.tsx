@@ -44,11 +44,12 @@ export default async function ExercisePage({ params }: { params: Promise<{ langu
 
   return (
     <TypingEngine 
-      exerciseId={exercise.id}
+      targetId={exercise.id}
       targetContent={exercise.content}
       isTrial={user.subscriptionStatus === "TRIAL"}
       layoutName={exercise.layout}
       language={exercise.language}
+      mode="PRACTICE"
     />
   )
 }

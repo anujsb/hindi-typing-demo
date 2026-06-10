@@ -17,7 +17,7 @@ export async function addExercise(data: {
   srNameDate: string;
   title: string;
   language: "ENGLISH" | "HINDI" | "MANGAL";
-  layout: "KURTIDEV_010" | "RAMINTON_GAIL" | "INSCRIPT" | "RAMINTON_GAIL_CBI" | "NONE";
+  layout: "KURTIDEV_010" | "RAMINTON_GAIL" | "INSCRIPT" | "RAMINTON_GAIL_CBI" | "STANDARD";
   content: string;
   isPremium: boolean;
   orderIndex: number;
@@ -41,7 +41,7 @@ export async function addVideo(data: {
   videoUrl: string;
   practiceTestContent: string;
   language: "ENGLISH" | "HINDI" | "MANGAL";
-  layout: "KURTIDEV_010" | "RAMINTON_GAIL" | "INSCRIPT" | "RAMINTON_GAIL_CBI";
+  layout: "KURTIDEV_010" | "RAMINTON_GAIL" | "INSCRIPT" | "RAMINTON_GAIL_CBI" | "STANDARD";
   isPremium: boolean;
 }) {
   await requireAdmin()

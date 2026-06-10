@@ -1,7 +1,7 @@
 import Link from "next/link"
 
 const languages = [
-  { id: "ENGLISH", name: "English", desc: "Standard English Layout", layouts: ["ENGLISH"] },
+  { id: "ENGLISH", name: "English", desc: "Standard English Layout", layouts: ["STANDARD"] },
   { id: "HINDI", name: "Hindi (Krutidev)", desc: "Legacy Typing Font", layouts: ["KURTIDEV_010"] },
   { id: "MANGAL", name: "Mangal Unicode", desc: "Standard Government Exams", layouts: ["RAMINTON_GAIL", "INSCRIPT", "RAMINTON_GAIL_CBI"] }
 ]

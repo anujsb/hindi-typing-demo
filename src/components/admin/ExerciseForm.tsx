@@ -34,7 +34,7 @@ export default function ExerciseForm() {
       srNameDate: formData.get("srNameDate") as string,
       title: formData.get("title") as string,
       language: language,
-      layout: language === "ENGLISH" ? "NONE" : (formData.get("layout") as "KURTIDEV_010" | "RAMINTON_GAIL" | "INSCRIPT" | "RAMINTON_GAIL_CBI" | "NONE"),
+      layout: language === "ENGLISH" ? "STANDARD" : (formData.get("layout") as "KURTIDEV_010" | "RAMINTON_GAIL" | "INSCRIPT" | "RAMINTON_GAIL_CBI" | "STANDARD"),
       content: textContent,
       isPremium: formData.get("isPremium") === "on",
       orderIndex: parseInt(formData.get("orderIndex") as string, 10)

@@ -69,6 +69,9 @@ export default async function VideoPage({ params }: { params: Promise<{ language
            <CustomVideoPlayer 
              videoId={video.id} 
              title={video.title}
+             videoUrl={video.videoUrl}
+             language={resolvedParams.language}
+             layout={resolvedParams.layout}
              isCompletedInitially={isCompleted} 
            />
         </div>

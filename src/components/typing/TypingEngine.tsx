@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { getLayout } from "@/layouts";
 import { FINGER_COLORS } from "@/layouts/types";
 import { saveExerciseProgress } from "@/actions/practice";
+import { markVideoCompleted } from "@/actions/learning";
 
 interface KeyDef {
   key: string;
@@ -31,14 +32,16 @@ const QUICK_REF = [
 ];
 
 export interface TypingEngineProps {
-  exerciseId: string;
+  targetId: string;
   targetContent: string;
   isTrial: boolean;
   layoutName: string;
   language: string;
+  mode: "LEARNING" | "PRACTICE";
+  onLearningCompletePath?: string;
 }
 
-export default function TypingEngine({ exerciseId, targetContent, isTrial, layoutName, language }: TypingEngineProps) {
+export default function TypingEngine({ targetId, targetContent, isTrial, layoutName, language, mode, onLearningCompletePath }: TypingEngineProps) {
   const router = useRouter();
   
   const [layoutId, setLayoutId] = useState<string>(
@@ -104,14 +107,22 @@ export default function TypingEngine({ exerciseId, targetContent, isTrial, layou
       }
       const accuracy = (correctChars / Math.max(text.length, 1)) * 100;
 
-      saveExerciseProgress({
-        exerciseId,
-        wpm: wpm || 0,
-        accuracy: accuracy || 0,
-        timeTaken: timeTakenSec
-      });
+      if (mode === "PRACTICE") {
+        saveExerciseProgress({
+          exerciseId: targetId,
+          wpm: wpm || 0,
+          accuracy: accuracy || 0,
+          timeTaken: timeTakenSec
+        });
+      } else {
+        markVideoCompleted(targetId).then(() => {
+          if (onLearningCompletePath) {
+            router.push(onLearningCompletePath);
+          }
+        });
+      }
     }
-  }, [isFinished, text, targetContent, savedStats, elapsedSeconds, isTrial, exerciseId]);
+  }, [isFinished, text, targetContent, savedStats, elapsedSeconds, isTrial, targetId, mode, router, onLearningCompletePath]);
 
   const insertTextAtCursor = useCallback((textToInsert: string) => {
     const ta = textareaRef.current;
@@ -230,7 +241,9 @@ export default function TypingEngine({ exerciseId, targetContent, isTrial, layou
     <div className="bg-[#faf7f2] px-5 sm:px-8 py-10 min-h-screen font-[Georgia,serif] text-[#1c1810]">
       {/* Header */}
       <header className="mb-6 text-center">
-        <p className="mb-2.5 font-mono text-[#a0896a] text-xs uppercase tracking-[0.18em]">Practice Session</p>
+        <p className="mb-2.5 font-mono text-[#a0896a] text-xs uppercase tracking-[0.18em]">
+          {mode === "LEARNING" ? "Learning Module Practice Test" : "Practice Session"}
+        </p>
         <h1 className="font-serif font-bold text-[#1c1810] md:text-[3.2rem] text-3xl sm:text-4xl leading-tight tracking-tight">हिंदी टाइपिंग</h1>
         <div className="bg-[#c9a96e] mx-auto mt-4 rounded-sm w-12 h-0.5" />
       </header>
