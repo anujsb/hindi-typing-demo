@@ -9,7 +9,7 @@ export default async function AdminVideos() {
     <div className="max-w-5xl mx-auto space-y-8 pb-12">
       <header>
         <h2 className="text-3xl font-serif font-bold text-[#faf7f2]">Manage Learning Module</h2>
-        <p className="text-[#a0896a] mt-2 font-sans">Map out the Day-by-Day learning curriculum.</p>
+        <p className="text-[#a0896a] mt-2 font-sans">Upload Video URLs and assign the quick Practice Test text for each day.</p>
       </header>
 
       <VideoForm />

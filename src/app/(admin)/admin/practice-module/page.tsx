@@ -9,7 +9,7 @@ export default async function AdminExercises() {
     <div className="max-w-5xl mx-auto space-y-8 pb-12">
       <header>
         <h2 className="text-3xl font-serif font-bold text-[#faf7f2]">Manage Practice Module</h2>
-        <p className="text-[#a0896a] mt-2 font-sans">Add new typing passages or view existing ones.</p>
+        <p className="text-[#a0896a] mt-2 font-sans">Add standalone full-length Exams here.</p>
       </header>
 
       <ExerciseForm />
@@ -18,9 +18,9 @@ export default async function AdminExercises() {
         <table className="w-full text-left font-sans text-sm">
           <thead className="bg-[#1c1810] text-[#a0896a] uppercase tracking-wider text-xs border-b border-[#332b1e]">
             <tr>
-              <th className="px-6 py-4 font-semibold">Order</th>
-              <th className="px-6 py-4 font-semibold">SR Name</th>
+              <th className="px-6 py-4 font-semibold">Exam Code</th>
               <th className="px-6 py-4 font-semibold">Title</th>
+              <th className="px-6 py-4 font-semibold">Language</th>
               <th className="px-6 py-4 font-semibold">Lang / Layout</th>
               <th className="px-6 py-4 font-semibold">Premium</th>
             </tr>

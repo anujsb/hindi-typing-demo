@@ -1,30 +1,37 @@
 import { db } from "@/lib/db"
-import { exercises, videoTutorials } from "@/lib/schema"
+import { users } from "@/lib/schema"
+import { eq } from "drizzle-orm"
 import { NextResponse } from "next/server"
+import bcrypt from "bcryptjs"
 
 export async function GET() {
   try {
-    await db.insert(exercises).values({
-      srNameDate: "001_Demo_Exercise_" + Date.now(),
-      title: "Demo Hindi Typing Passage",
-      language: "HINDI",
-      layout: "KURTIDEV_010",
-      content: "यह एक उदाहरण है कि हिंदी टाइपिंग कैसे की जाती है।",
-      isPremium: false,
-      orderIndex: 1
-    })
-
-    await db.insert(videoTutorials).values({
-      day: 1,
-      title: "Day 1: Home-Row Introduction",
-      description: "Learn the home row keys for KrutiDev 010.",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      language: "HINDI",
-      layout: "KURTIDEV_010",
-      isPremium: false
-    })
+    const email = "expertypingtutor@gmail.com"
+    const newPassword = "password123"
     
-    return NextResponse.json({ success: true, message: "Demo data seeded!" })
+    const hash = await bcrypt.hash(newPassword, 10)
+    
+    const existing = await db.select().from(users).where(eq(users.email, email))
+    
+    if (existing.length > 0) {
+      await db.update(users)
+        .set({ passwordHash: hash, role: "ADMIN" })
+        .where(eq(users.email, email))
+      return NextResponse.json({ success: true, message: `Account updated! Password is ${newPassword} and role is ADMIN.` })
+    } else {
+      await db.insert(users).values({
+        id: crypto.randomUUID(),
+        email: email,
+        fullName: "Admin",
+        mobileNumber: "0000000000",
+        examName: "N/A",
+        district: "N/A",
+        state: "N/A",
+        passwordHash: hash,
+        role: "ADMIN"
+      })
+      return NextResponse.json({ success: true, message: `Account created! Password is ${newPassword} and role is ADMIN.` })
+    }
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message })
   }

@@ -28,14 +28,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <Link href="/admin" className="block px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#332b1e] text-[#a0896a] hover:text-[#faf7f2] transition-colors">
             Dashboard
           </Link>
-          <Link href="/admin/exercises" className="block px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#332b1e] text-[#a0896a] hover:text-[#faf7f2] transition-colors">
-            Practice Module
+          <Link href="/admin/learning-module" className="block px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#332b1e] text-[#a0896a] hover:text-[#faf7f2] transition-colors">
+            Manage Learning Module
           </Link>
-          <Link href="/admin/videos" className="block px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#332b1e] text-[#a0896a] hover:text-[#faf7f2] transition-colors">
-            Learning Module
-          </Link>
-          <Link href="/admin/exams" className="block px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#332b1e] text-[#a0896a] hover:text-[#faf7f2] transition-colors">
-            Manage Exams
+          <Link href="/admin/practice-module" className="block px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#332b1e] text-[#a0896a] hover:text-[#faf7f2] transition-colors">
+            Manage Practice Module
           </Link>
           <Link href="/admin/users" className="block px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#332b1e] text-[#a0896a] hover:text-[#faf7f2] transition-colors">
             User Accounts

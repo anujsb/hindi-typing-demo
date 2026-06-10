@@ -51,7 +51,7 @@ export default function ExerciseForm() {
 
   return (
     <form onSubmit={onSubmit} className="bg-[#262015] p-6 rounded-2xl border border-[#332b1e] space-y-4 font-sans text-sm mt-6">
-      <h3 className="text-xl font-bold text-[#faf7f2] mb-4">Add Practice Exercise</h3>
+      <h3 className="text-xl font-bold text-[#faf7f2] mb-4">Add New Exam (Practice Module)</h3>
       {error && <div className="p-3 bg-red-900/50 text-red-300 rounded border border-red-800">{error}</div>}
       
       <div className="grid grid-cols-2 gap-4">
@@ -116,8 +116,8 @@ export default function ExerciseForm() {
         />
       </div>
 
-      <button disabled={loading} type="submit" className="w-full py-3 bg-[#c9a96e] text-white rounded font-bold hover:bg-[#b5955a] transition-colors">
-        {loading ? "Saving..." : "Save Practice Exercise"}
+      <button disabled={loading} type="submit" className="w-full py-3 bg-[#c9a96e] text-white rounded font-bold hover:bg-[#b5955a] transition-colors mt-2">
+        {loading ? "Saving..." : "Save Exam"}
       </button>
     </form>
   )

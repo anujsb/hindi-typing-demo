@@ -69,11 +69,6 @@ export default function RegisterPage() {
               <Input id="password" name="password" type="password" required />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="examName">Target Exam</Label>
-              <Input id="examName" name="examName" placeholder="e.g. UPSSSC, SSC (Optional)" />
-            </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="state">State</Label>

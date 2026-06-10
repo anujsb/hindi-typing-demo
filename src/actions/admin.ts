@@ -39,6 +39,7 @@ export async function addVideo(data: {
   title: string;
   description: string;
   videoUrl: string;
+  practiceTestContent: string;
   language: "ENGLISH" | "HINDI" | "MANGAL";
   layout: "KURTIDEV_010" | "RAMINTON_GAIL" | "INSCRIPT" | "RAMINTON_GAIL_CBI";
   isPremium: boolean;

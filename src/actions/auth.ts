@@ -10,7 +10,6 @@ export async function registerUser(formData: FormData) {
   const email = formData.get("email") as string
   const mobileNumber = formData.get("mobileNumber") as string
   const password = formData.get("password") as string
-  const examName = formData.get("examName") as string
   const district = formData.get("district") as string
   const state = formData.get("state") as string
 
@@ -41,7 +40,6 @@ export async function registerUser(formData: FormData) {
       email,
       mobileNumber,
       passwordHash,
-      examName,
       district,
       state,
       subscriptionStatus: "TRIAL",

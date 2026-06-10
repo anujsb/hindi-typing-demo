@@ -21,6 +21,7 @@ export default function VideoForm() {
       title: formData.get("title") as string,
       description: formData.get("description") as string,
       videoUrl: formData.get("videoUrl") as string,
+      practiceTestContent: formData.get("practiceTestContent") as string,
       language: formData.get("language") as "ENGLISH" | "HINDI" | "MANGAL",
       layout: formData.get("layout") as "KURTIDEV_010" | "RAMINTON_GAIL" | "INSCRIPT" | "RAMINTON_GAIL_CBI",
       isPremium: formData.get("isPremium") === "on",
@@ -36,8 +37,8 @@ export default function VideoForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="bg-[#262015] p-6 rounded-2xl border border-[#332b1e] space-y-4 font-sans text-sm mt-6">
-      <h3 className="text-xl font-bold text-[#faf7f2] mb-4">Add New Learning Exercise</h3>
+    <form onSubmit={onSubmit} className="bg-[#262015] p-6 rounded-2xl border border-[#332b1e] space-y-6 font-sans text-sm mt-6">
+      <h3 className="text-xl font-bold text-[#faf7f2] mb-4">Add Learning Day (Video + Practice Test)</h3>
       {error && <div className="p-3 bg-red-900/50 text-red-300 rounded border border-red-800">{error}</div>}
       
       <div className="grid grid-cols-2 gap-4">
@@ -77,8 +78,13 @@ export default function VideoForm() {
       </div>
 
       <div className="space-y-1">
-        <label className="text-[#a0896a]">Description</label>
-        <textarea required name="description" placeholder="Short description of the video..." className="w-full bg-[#1c1810] border-[#332b1e] rounded px-3 py-2 text-white h-20 resize-y" />
+        <label className="text-[#a0896a]">Description / Lesson Focus (Optional)</label>
+        <textarea name="description" placeholder="Today we focus on the home row..." className="w-full bg-[#1c1810] border-[#332b1e] rounded px-3 py-2 text-white h-20" />
+      </div>
+
+      <div className="space-y-1">
+        <label className="text-[#a0896a]">Practice Test Content (For post-video typing test)</label>
+        <textarea required name="practiceTestContent" placeholder="Paste the exact Hindi passage they should type after the video..." className="w-full bg-[#1c1810] border-[#332b1e] rounded px-3 py-2 text-white h-32 font-serif" />
       </div>
 
       <div className="flex items-center space-x-2 pt-2">
