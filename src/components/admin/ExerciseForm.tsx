@@ -9,6 +9,7 @@ export default function ExerciseForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [textContent, setTextContent] = useState("")
+  const [language, setLanguage] = useState<"ENGLISH" | "HINDI" | "MANGAL">("ENGLISH")
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -32,8 +33,8 @@ export default function ExerciseForm() {
     const result = await addExercise({
       srNameDate: formData.get("srNameDate") as string,
       title: formData.get("title") as string,
-      language: formData.get("language") as "ENGLISH" | "HINDI" | "MANGAL",
-      layout: formData.get("layout") as "KURTIDEV_010" | "RAMINTON_GAIL" | "INSCRIPT" | "RAMINTON_GAIL_CBI",
+      language: language,
+      layout: language === "ENGLISH" ? "NONE" : (formData.get("layout") as "KURTIDEV_010" | "RAMINTON_GAIL" | "INSCRIPT" | "RAMINTON_GAIL_CBI" | "NONE"),
       content: textContent,
       isPremium: formData.get("isPremium") === "on",
       orderIndex: parseInt(formData.get("orderIndex") as string, 10)
@@ -68,21 +69,24 @@ export default function ExerciseForm() {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
           <label className="text-[#a0896a]">Language</label>
-          <select required name="language" className="w-full bg-[#1c1810] border-[#332b1e] rounded px-3 py-2 text-white">
+          <select required name="language" value={language} onChange={(e) => setLanguage(e.target.value as any)} className="w-full bg-[#1c1810] border-[#332b1e] rounded px-3 py-2 text-white">
             <option value="ENGLISH">English</option>
             <option value="HINDI">Hindi (Legacy)</option>
             <option value="MANGAL">Mangal (Unicode)</option>
           </select>
         </div>
-        <div className="space-y-1">
-          <label className="text-[#a0896a]">Layout</label>
-          <select required name="layout" className="w-full bg-[#1c1810] border-[#332b1e] rounded px-3 py-2 text-white">
-            <option value="KURTIDEV_010">KrutiDev 010</option>
-            <option value="RAMINTON_GAIL">Remington Gail</option>
-            <option value="INSCRIPT">Inscript</option>
-            <option value="RAMINTON_GAIL_CBI">Remington Gail CBI</option>
-          </select>
-        </div>
+        
+        {language !== "ENGLISH" && (
+          <div className="space-y-1">
+            <label className="text-[#a0896a]">Layout</label>
+            <select required name="layout" className="w-full bg-[#1c1810] border-[#332b1e] rounded px-3 py-2 text-white">
+              <option value="KURTIDEV_010">KrutiDev 010</option>
+              <option value="RAMINTON_GAIL">Remington Gail</option>
+              <option value="INSCRIPT">Inscript</option>
+              <option value="RAMINTON_GAIL_CBI">Remington Gail CBI</option>
+            </select>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">

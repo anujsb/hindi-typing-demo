@@ -8,6 +8,7 @@ export default function VideoForm() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [language, setLanguage] = useState<"ENGLISH" | "HINDI" | "MANGAL">("ENGLISH")
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -22,8 +23,8 @@ export default function VideoForm() {
       description: formData.get("description") as string,
       videoUrl: formData.get("videoUrl") as string,
       practiceTestContent: formData.get("practiceTestContent") as string,
-      language: formData.get("language") as "ENGLISH" | "HINDI" | "MANGAL",
-      layout: formData.get("layout") as "KURTIDEV_010" | "RAMINTON_GAIL" | "INSCRIPT" | "RAMINTON_GAIL_CBI",
+      language: language,
+      layout: language === "ENGLISH" ? "NONE" : (formData.get("layout") as "KURTIDEV_010" | "RAMINTON_GAIL" | "INSCRIPT" | "RAMINTON_GAIL_CBI" | "NONE"),
       isPremium: formData.get("isPremium") === "on",
     })
 
@@ -55,21 +56,24 @@ export default function VideoForm() {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1">
           <label className="text-[#a0896a]">Language</label>
-          <select required name="language" className="w-full bg-[#1c1810] border-[#332b1e] rounded px-3 py-2 text-white">
+          <select required name="language" value={language} onChange={(e) => setLanguage(e.target.value as any)} className="w-full bg-[#1c1810] border-[#332b1e] rounded px-3 py-2 text-white">
             <option value="ENGLISH">English</option>
             <option value="HINDI">Hindi (Legacy)</option>
             <option value="MANGAL">Mangal (Unicode)</option>
           </select>
         </div>
-        <div className="space-y-1">
-          <label className="text-[#a0896a]">Layout</label>
-          <select required name="layout" className="w-full bg-[#1c1810] border-[#332b1e] rounded px-3 py-2 text-white">
-            <option value="KURTIDEV_010">KrutiDev 010</option>
-            <option value="RAMINTON_GAIL">Remington Gail</option>
-            <option value="INSCRIPT">Inscript</option>
-            <option value="RAMINTON_GAIL_CBI">Remington Gail CBI</option>
-          </select>
-        </div>
+        
+        {language !== "ENGLISH" && (
+          <div className="space-y-1">
+            <label className="text-[#a0896a]">Layout</label>
+            <select required name="layout" className="w-full bg-[#1c1810] border-[#332b1e] rounded px-3 py-2 text-white">
+              <option value="KURTIDEV_010">KrutiDev 010</option>
+              <option value="RAMINTON_GAIL">Remington Gail</option>
+              <option value="INSCRIPT">Inscript</option>
+              <option value="RAMINTON_GAIL_CBI">Remington Gail CBI</option>
+            </select>
+          </div>
+        )}
       </div>
 
       <div className="space-y-1">

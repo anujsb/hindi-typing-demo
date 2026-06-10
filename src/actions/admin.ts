@@ -17,7 +17,7 @@ export async function addExercise(data: {
   srNameDate: string;
   title: string;
   language: "ENGLISH" | "HINDI" | "MANGAL";
-  layout: "KURTIDEV_010" | "RAMINTON_GAIL" | "INSCRIPT" | "RAMINTON_GAIL_CBI";
+  layout: "KURTIDEV_010" | "RAMINTON_GAIL" | "INSCRIPT" | "RAMINTON_GAIL_CBI" | "NONE";
   content: string;
   isPremium: boolean;
   orderIndex: number;
