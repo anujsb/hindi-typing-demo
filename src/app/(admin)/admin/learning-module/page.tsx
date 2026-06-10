@@ -27,7 +27,7 @@ export default async function AdminVideos() {
           <tbody className="divide-y divide-[#332b1e] text-white">
             {existingVideos.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-6 py-8 text-center text-[#7a6344]">No learning exercises found.</td>
+                <td colSpan={4} className="px-6 py-8 text-center text-[#7a6344]">No learning videos found.</td>
               </tr>
             ) : (
               existingVideos.map(vid => (

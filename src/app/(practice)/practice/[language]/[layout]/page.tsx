@@ -28,14 +28,14 @@ export default async function ExerciseList({ params }: { params: Promise<{ langu
             {langUpper} · {layoutUpper.replace(/_/g, " ")}
           </p>
           <h1 className="text-4xl font-bold tracking-tight text-[#1c1810]">
-            Exercises
+            Exams
           </h1>
           <div className="bg-[#c9a96e] mx-auto mt-5 rounded-sm w-12 h-0.5" />
         </header>
 
         {exerciseList.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[#e8dcc8]">
-             <p className="text-[#a0896a] font-sans">No exercises found for this layout.</p>
+             <p className="text-[#a0896a] font-sans">No exams found for this layout.</p>
           </div>
         ) : (
           <div className="bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[#e8dcc8] overflow-hidden rounded-3xl font-sans">

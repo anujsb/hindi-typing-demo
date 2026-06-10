@@ -17,6 +17,8 @@ const formatTime = (seconds: number) => {
   return `${mm.toString().padStart(2, '0')}:${ss}`
 }
 
+const Player = ReactPlayer as any;
+
 export default function CustomVideoPlayer({ 
   videoId, 
   title, 
@@ -90,31 +92,28 @@ export default function CustomVideoPlayer({
         onMouseLeave={() => playing && setShowControls(false)}
       >
         <div className="aspect-video bg-[#0f0d09] flex flex-col items-center justify-center relative" onClick={togglePlayPause}>
-          {isClient && (() => {
-            const Player = ReactPlayer as any;
-            return (
-              <Player 
-                ref={playerRef}
-                url={videoUrl}
-                width="100%"
-                height="100%"
-                controls={false} /* Hide Native Controls */
-                playing={playing}
-                onEnded={handleComplete}
-                onProgress={handleProgress}
-                onDuration={setDuration}
-                config={{
-                  youtube: {
-                    playerVars: { 
-                      modestbranding: 1, 
-                      rel: 0, 
-                      disablekb: 1 
-                    }
+          {isClient && (
+            <Player 
+              ref={playerRef}
+              url={videoUrl}
+              width="100%"
+              height="100%"
+              controls={false}
+              playing={playing}
+              onEnded={handleComplete}
+              onProgress={handleProgress}
+              onDuration={setDuration}
+              config={{
+                youtube: {
+                  playerVars: { 
+                    modestbranding: 1, 
+                    rel: 0, 
+                    disablekb: 1 
                   }
-                }}
-              />
-            );
-          })()}
+                }
+              }}
+            />
+          )}
           
           {/* Overlay Play/Pause Button */}
           {!playing && (

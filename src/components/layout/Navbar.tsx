@@ -15,8 +15,8 @@ export default async function Navbar() {
             </Link>
             <div className="hidden sm:flex gap-6">
               <Link href="/dashboard" className="text-sm font-semibold text-[#7a6344] hover:text-[#c9a96e] transition-colors">Dashboard</Link>
-              <Link href="/learning" className="text-sm font-semibold text-[#7a6344] hover:text-[#c9a96e] transition-colors">Learning</Link>
-              <Link href="/practice" className="text-sm font-semibold text-[#7a6344] hover:text-[#c9a96e] transition-colors">Practice</Link>
+              <Link href="/learning" className="text-sm font-semibold text-[#7a6344] hover:text-[#c9a96e] transition-colors">Learning Module</Link>
+              <Link href="/practice" className="text-sm font-semibold text-[#7a6344] hover:text-[#c9a96e] transition-colors">Exams</Link>
             </div>
           </div>
           <div className="flex items-center gap-4">

@@ -32,7 +32,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             Manage Learning Module
           </Link>
           <Link href="/admin/practice-module" className="block px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#332b1e] text-[#a0896a] hover:text-[#faf7f2] transition-colors">
-            Manage Practice Module
+            Manage Exams
           </Link>
           <Link href="/admin/users" className="block px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#332b1e] text-[#a0896a] hover:text-[#faf7f2] transition-colors">
             User Accounts

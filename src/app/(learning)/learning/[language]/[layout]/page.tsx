@@ -40,7 +40,7 @@ export default async function VideoList({ params }: { params: Promise<{ language
             {langUpper} · {layoutUpper.replace(/_/g, " ")}
           </p>
           <h1 className="text-4xl font-bold tracking-tight text-[#1c1810]">
-            Learning Exercises
+            Learning Module
           </h1>
           <div className="bg-[#c9a96e] mx-auto mt-5 rounded-sm w-12 h-0.5" />
         </header>

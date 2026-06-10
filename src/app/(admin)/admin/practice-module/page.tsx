@@ -8,7 +8,7 @@ export default async function AdminExercises() {
   return (
     <div className="max-w-5xl mx-auto space-y-8 pb-12">
       <header>
-        <h2 className="text-3xl font-serif font-bold text-[#faf7f2]">Manage Practice Module</h2>
+        <h2 className="text-3xl font-serif font-bold text-[#faf7f2]">Manage Exams</h2>
         <p className="text-[#a0896a] mt-2 font-sans">Add standalone full-length Exams here.</p>
       </header>
 
@@ -28,7 +28,7 @@ export default async function AdminExercises() {
           <tbody className="divide-y divide-[#332b1e] text-white">
             {existingExercises.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-[#7a6344]">No exercises found.</td>
+                <td colSpan={5} className="px-6 py-8 text-center text-[#7a6344]">No exams found.</td>
               </tr>
             ) : (
               existingExercises.map(ex => (
